@@ -26,17 +26,18 @@ filekits/
     └── pd_util.py          # pandas数据处理工具
 ```
 
-## 📦 安装
-
-### 环境要求
-
-- Python 3.6+
-- 依赖包：pandas, openpyxl, pyyaml, requests
-
-### 安装依赖
+## 📦 安装/更新/卸载
 
 ```bash
-pip install pandas openpyxl pyyaml requests
+pip install filekits
+```
+
+```bash
+pip install --upgrade filekits
+```
+
+```bash
+pip uninstall filekits
 ```
 
 ## 🛠️ 使用方法
@@ -160,8 +161,7 @@ from filekits.base_io.down_load import download_files
 
 urls = [
     'https://example.com/image1.jpg',
-    'https://example.com/image2.jpg',
-    'https://example.com/image3.jpg'
+    'https://example.com/image2.jpg'
 ]
 
 # 批量下载图片
@@ -205,19 +205,6 @@ clean_data = remove_keys(data, ["password"])
 3. **错误处理**：批量下载时支持失败跳过或抛出异常两种模式
 4. **路径处理**：使用绝对路径或相对路径均可，程序会自动处理
 
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request来改进这个项目！
-
 ## 📄 许可证
 
 MIT License - 详见LICENSE文件
-
-## 🔗 相关链接
-
-- [GitHub仓库](https://github.com/your-username/filekits)
-- [PyPI包](https://pypi.org/project/filekits/) (如有)
-
----
-
-如有问题或建议，欢迎联系项目维护者！
