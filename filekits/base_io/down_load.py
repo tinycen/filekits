@@ -190,3 +190,30 @@ def download_encode_base64(url):
     except Exception as e:
         print(f"文件下载或转换base64失败, url：{url} \n Reason：{e}")
         raise e
+
+# 批量 下载网络文件并转为base64编码
+def batch_download_encode_base64(urls: list,skip_error=True):
+    """
+    批量下载网络文件并转为base64编码
+    
+    Args:
+        urls: 文件URL列表
+        skip_error: 是否跳过错误文件，默认True
+
+    Returns:
+        list: 包含每个文件base64编码的列表
+        
+    Raises:
+        Exception: 下载失败时抛出异常
+    """
+    base64_list = []
+    for url in urls:
+        try:
+            base64_data = download_encode_base64(url)
+            base64_list.append(base64_data)
+        except Exception as e:
+            if skip_error:
+                print(f"跳过错误文件 {url}，错误信息：{e}")
+            else:
+                raise e
+    return base64_list

@@ -185,6 +185,19 @@ base64_str = download_encode_base64('https://example.com/image.jpg')
 # 如：直接上传到云存储、嵌入到HTML/CSS、API传输等
 ```
 
+#### 批量下载并转为Base64
+```python
+from filekits.base_io.down_load import batch_download_encode_base64
+
+urls = [
+    'https://example.com/image1.jpg',
+    'https://example.com/image2.jpg'
+]
+
+# 批量下载并获取base64编码
+base64_list = batch_download_encode_base64(urls)
+```
+
 ### 5. 工具函数
 
 #### 字典操作
