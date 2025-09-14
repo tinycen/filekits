@@ -174,6 +174,17 @@ file_paths = download_files(urls, './downloads', extensions=['.jpg', '.png'])
 file_dicts = download_files(urls, './downloads', return_type="dict")
 ```
 
+#### 下载并转为Base64
+```python
+from filekits.base_io.down_load import download_encode_base64
+
+# 下载文件并直接获取base64编码
+base64_str = download_encode_base64('https://example.com/image.jpg')
+
+# 适用于需要直接处理文件内容而不保存到本地的场景
+# 如：直接上传到云存储、嵌入到HTML/CSS、API传输等
+```
+
 ### 5. 工具函数
 
 #### 字典操作
@@ -207,4 +218,4 @@ clean_data = remove_keys(data, ["password"])
 
 ## 📄 许可证
 
-MIT License - 详见LICENSE文件
+MIT License

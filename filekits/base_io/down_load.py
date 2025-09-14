@@ -1,5 +1,31 @@
 import os
+import base64
 from funcguard.tools import send_request
+
+
+def _send_request_with_retry(url, headers=None):
+    """
+    内部方法：发送带重试的请求，处理阿里CDN特殊逻辑
+    
+    Args:
+        url: 请求的URL
+        headers: 自定义请求头（可选）
+        
+    Returns:
+        response: 请求响应对象
+    """
+    if headers is None:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        }
+    
+    # 为阿里cdn添加特殊处理
+    if "https://cbu01.alicdn.com" in url:
+        response = send_request(method='GET', url=url, headers=headers, stream=True)
+    else:
+        response = send_request(method='GET', url=url, stream=True)
+    
+    return response
 
 
 # 下载网络文件
@@ -40,18 +66,8 @@ def download_file(url, download_dir, file_name="", return_type="name"):
     if os.path.exists(file_path):
         print(f"文件 {file_name} 已经存在，跳过下载")
     else:
-        # 设置请求头
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-        }
-        
-        # 使用 send_request 自动重试下载
         try:
-            # 为阿里cdn添加特殊处理
-            if "https://cbu01.alicdn.com" in url:
-                response = send_request( method='GET', url=url, headers=headers, stream=True )
-            else:
-                response = send_request( method='GET', url=url, stream=True )
+            response = _send_request_with_retry(url)
             
             # 以二进制模式写入文件
             with open(file_path, 'wb') as file:
@@ -60,7 +76,7 @@ def download_file(url, download_dir, file_name="", return_type="name"):
                         file.write(chunk)
                         
         except Exception as e:
-            print(f"文件下载失败, url： {url} \n Reason：{e}")
+            print(f"文件下载失败, url： {url} \nReason：{e}")
             raise e  # 重新抛出异常，让调用者处理
 
     if return_type == "name":
@@ -146,3 +162,31 @@ def download_files(files, output_folder, return_type="list", extensions=None, on
             raise ValueError("return_type 参数错误，请传入 'list' 或 'dict'")
 
     return files_path
+
+
+# 下载网络文件并转为base64编码
+def download_encode_base64(url):
+    """
+    下载网络文件并直接返回base64编码
+    
+    Args:
+        url: 文件URL
+        
+    Returns:
+        str: 文件的base64编码字符串
+        
+    Raises:
+        Exception: 下载失败时抛出异常
+    """
+    try:
+        response = _send_request_with_retry(url)
+        
+        # 读取文件内容并转为base64
+        file_data = response.content
+        base64_data = base64.b64encode(file_data).decode('utf-8')
+        
+        return base64_data
+        
+    except Exception as e:
+        print(f"文件下载或转换base64失败, url：{url} \n Reason：{e}")
+        raise e
