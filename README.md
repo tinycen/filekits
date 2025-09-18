@@ -131,6 +131,20 @@ jpg_files = find_files('/path/to/folder', '.jpg')
 specific_files = find_files('/path/to/folder', '.txt', 'log')
 ```
 
+#### 向上查找指定文件夹
+```python
+from filekits.base_io.folder import find_parent_folder
+
+# 从当前文件位置开始，向上查找指定名称的文件夹
+# 例如查找名为 "project" 的父文件夹路径
+project_path = find_parent_folder("project")
+
+if project_path:
+    print(f"找到文件夹路径: {project_path}")
+else:
+    print("未找到指定的文件夹")
+```
+
 #### 清空文件夹
 ```python
 from filekits.base_io.folder import clear_folder
