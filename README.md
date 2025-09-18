@@ -29,10 +29,6 @@ filekits/
 ## 📦 安装/更新/卸载
 
 ```bash
-pip install filekits
-```
-
-```bash
 pip install --upgrade filekits
 ```
 
