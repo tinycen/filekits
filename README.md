@@ -32,17 +32,13 @@ filekits/
 pip install --upgrade filekits
 ```
 
-```bash
-pip uninstall filekits
-```
-
 ## 🛠️ 使用方法
 
 ### 1. 文件读取
 
 #### 读取文本文件
 ```python
-from filekits.base_io.load import load_txt
+from filekits.base_io import load_txt
 
 # 读取txt文件为列表
 text_list = load_txt('example.txt')
@@ -56,21 +52,21 @@ lower_list = load_txt('example.txt', lower_list=1)
 
 #### 读取JSON文件
 ```python
-from filekits.base_io.load import load_json
+from filekits.base_io import load_json
 
 data = load_json('data.json')
 ```
 
 #### 读取YAML文件
 ```python
-from filekits.base_io.load import load_yaml
+from filekits.base_io import load_yaml
 
 config = load_yaml('config.yaml')
 ```
 
 #### 读取Excel文件
 ```python
-from filekits.base_io.load import load_excel
+from filekits.base_io import load_excel
 
 # 读取为pandas DataFrame
 df = load_excel('data.xlsx', return_type="df")
@@ -83,7 +79,7 @@ wb, sheet, rows = load_excel('data.xlsx', return_type="sheet")
 
 #### 保存DataFrame
 ```python
-from filekits.base_io.save import save_df
+from filekits.base_io import save_df
 import pandas as pd
 
 df = pd.DataFrame({'name': ['Alice', 'Bob'], 'age': [25, 30]})
@@ -100,7 +96,7 @@ save_df(df, 'output.json')
 
 #### 保存JSON文件
 ```python
-from filekits.base_io.save import save_json
+from filekits.base_io import save_json
 
 data = {"name": "Alice", "age": 25}
 save_json(data, 'data.json')
@@ -108,7 +104,7 @@ save_json(data, 'data.json')
 
 #### 保存文本文件
 ```python
-from filekits.base_io.save import save_txt
+from filekits.base_io import save_txt
 
 my_list = ['line1', 'line2', 'line3']
 save_txt(my_list, 'output.txt')
@@ -118,7 +114,7 @@ save_txt(my_list, 'output.txt')
 
 #### 查找文件
 ```python
-from filekits.base_io.folder import find_files
+from filekits.base_io import find_files
 
 # 查找所有jpg文件
 jpg_files = find_files('/path/to/folder', '.jpg')
@@ -129,7 +125,7 @@ specific_files = find_files('/path/to/folder', '.txt', 'log')
 
 #### 向上查找指定文件夹
 ```python
-from filekits.base_io.folder import find_parent_folder
+from filekits.base_io import find_parent_folder
 
 # 从当前文件位置开始，向上查找指定名称的文件夹
 # 例如查找名为 "project" 的父文件夹路径
@@ -143,7 +139,7 @@ else:
 
 #### 清空文件夹
 ```python
-from filekits.base_io.folder import clear_folder
+from filekits.base_io import clear_folder
 
 # 清空并重新创建文件夹
 clear_folder('/path/to/clean')
@@ -153,7 +149,7 @@ clear_folder('/path/to/clean')
 
 #### 单文件下载
 ```python
-from filekits.base_io.down_load import download_file
+from filekits.base_io import download_file
 
 # 下载文件
 file_path = download_file('https://example.com/file.jpg', './downloads')
@@ -167,7 +163,7 @@ file_path, file_name = download_file('https://example.com/file.jpg', './download
 
 #### 批量下载
 ```python
-from filekits.base_io.down_load import download_files
+from filekits.base_io import download_files
 
 urls = [
     'https://example.com/image1.jpg',
@@ -186,7 +182,7 @@ file_dicts = download_files(urls, './downloads', return_type="dict")
 
 #### 下载并转为Base64
 ```python
-from filekits.base_io.down_load import download_encode_base64
+from filekits.base_io import download_encode_base64
 
 # 下载文件并直接获取base64编码
 base64_str = download_encode_base64('https://example.com/image.jpg')
@@ -197,7 +193,7 @@ base64_str = download_encode_base64('https://example.com/image.jpg')
 
 #### 批量下载并转为Base64
 ```python
-from filekits.base_io.down_load import batch_download_encode_base64
+from filekits.base_io import batch_download_encode_base64
 
 urls = [
     'https://example.com/image1.jpg',
