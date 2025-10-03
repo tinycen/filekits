@@ -20,10 +20,10 @@ def _send_request_with_retry(url, headers=None):
         }
     
     # 为阿里cdn添加特殊处理
-    if "https://cbu01.alicdn.com" in url:
-        response = send_request(method='GET', url=url, headers=headers)
-    else:
-        response = send_request(method='GET', url=url)
+    # if "https://cbu01.alicdn.com" in url:
+    #     response = send_request(method='GET', url=url, headers=headers)
+
+    response = send_request(method='GET', url=url, headers=headers)
     
     return response
 
