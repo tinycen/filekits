@@ -6,25 +6,28 @@ from funcguard.tools import send_request
 def _send_request_with_retry(url, headers=None):
     """
     内部方法：发送带重试的请求，处理阿里CDN特殊逻辑
-    
+
     Args:
         url: 请求的URL
         headers: 自定义请求头（可选）
-        
+        return_type: 返回类型，可选值：'json', 'text', 'response'
+
     Returns:
-        response: 请求响应对象
+        response: 请求响应对象或解析后的数据
     """
     if headers is None:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         }
-    
+
     # 为阿里cdn添加特殊处理
     # if "https://cbu01.alicdn.com" in url:
-    #     response = send_request(method='GET', url=url, headers=headers)
+    #     response = send_request(method='GET', url=url, headers=headers, return_type=return_type)
 
-    response = send_request(method='GET', url=url, headers=headers)
-    
+    response = send_request(
+        method="GET", url=url, headers=headers, return_type="response"
+    )
+
     return response
 
 
@@ -32,7 +35,7 @@ def _send_request_with_retry(url, headers=None):
 def download_file(url, download_dir, file_name="", return_type="name"):
     """
     使用 send_request 自动重试功能下载网络文件
-    
+
     Args:
         url: 文件URL
         download_dir: 下载目录
@@ -41,7 +44,7 @@ def download_file(url, download_dir, file_name="", return_type="name"):
             - "name": 仅返回文件名（默认）
             - "path": 仅返回完整路径
             - "both": 返回(路径, 文件名)元组
-    
+
     Returns:
         根据return_type参数返回：
             - "name": 文件名
@@ -55,8 +58,8 @@ def download_file(url, download_dir, file_name="", return_type="name"):
         file_name = url.split("/")[-1]
     else:
         # 如果提供了自定义文件名但没有扩展名，从URL获取扩展名
-        if '.' not in file_name:
-            file_extension = url.split(".")[-1] if '.' in url.split("/")[-1] else ""
+        if "." not in file_name:
+            file_extension = url.split(".")[-1] if "." in url.split("/")[-1] else ""
             if file_extension:
                 file_name = f"{file_name}.{file_extension}"
 
@@ -68,13 +71,13 @@ def download_file(url, download_dir, file_name="", return_type="name"):
     else:
         try:
             response = _send_request_with_retry(url)
-            
+
             # 以二进制模式写入文件
-            with open(file_path, 'wb') as file:
+            with open(file_path, "wb") as file:
                 for chunk in response.iter_content(1024):
                     if chunk:  # 过滤掉空chunk
                         file.write(chunk)
-                        
+
         except Exception as e:
             print(f"文件下载失败, url： {url} \nReason：{e}")
             raise e  # 重新抛出异常，让调用者处理
@@ -90,10 +93,13 @@ def download_file(url, download_dir, file_name="", return_type="name"):
 
 
 # 批量下载文件(单线程)，默认下载图片
-def download_files(files, output_folder, return_type="list", extensions=None, on_fail_action="skip"):
+def download_files(
+    files, output_folder,
+    return_type="list", extensions=None, on_fail_action="skip"
+):
     """
     批量下载文件
-    
+
     Args:
         files: 文件URL列表
         output_folder: 下载目录
@@ -102,10 +108,10 @@ def download_files(files, output_folder, return_type="list", extensions=None, on
         on_fail_action: 失败次数过多时的行为，可选值：
             - "skip": 跳过并结束整个循环（默认）
             - "raise": 抛出异常，报出错误
-    
+
     Returns:
         根据return_type参数返回文件路径列表或字典列表
-        
+
     Raises:
         RuntimeError: 当on_fail_action="raise"且下载失败次数过多时抛出
     """
@@ -116,7 +122,7 @@ def download_files(files, output_folder, return_type="list", extensions=None, on
     i = 0  # 将i移到循环外部
     download_fail_count = 0  # 将失败计数器也移到外部，按整个批次计算
     failed_urls = []  # 记录失败的URL
-    
+
     for url in files:
         # 提取文件扩展名
         ext = os.path.splitext(url)[1]
@@ -140,18 +146,20 @@ def download_files(files, output_folder, return_type="list", extensions=None, on
             print(f"文件下载失败，已跳过：{url}")
             download_fail_count += 1
             failed_urls.append(url)
-            
+
             if download_fail_count > 3:
                 error_msg = f"文件下载失败次数过多，已失败 {download_fail_count} 个文件。失败的URL: {failed_urls}"
-                
+
                 if on_fail_action == "raise":
                     raise RuntimeError(error_msg)
                 elif on_fail_action == "skip":
                     print(error_msg + "，已跳过剩余文件")
                     break  # 终止整个循环
                 else:
-                    raise ValueError("on_fail_action 参数错误，请传入 'skip' 或 'raise'")
-            
+                    raise ValueError(
+                        "on_fail_action 参数错误，请传入 'skip' 或 'raise'"
+                    )
+
             continue
 
         if return_type == "list":
@@ -168,41 +176,42 @@ def download_files(files, output_folder, return_type="list", extensions=None, on
 def download_encode_base64(url):
     """
     下载网络文件并直接返回base64编码
-    
+
     Args:
         url: 文件URL
-        
+
     Returns:
         str: 文件的base64编码字符串
-        
+
     Raises:
         Exception: 下载失败时抛出异常
     """
     try:
         response = _send_request_with_retry(url)
-        
+
         # 读取文件内容并转为base64
         file_data = response.content
-        base64_data = base64.b64encode(file_data).decode('utf-8')
-        
+        base64_data = base64.b64encode(file_data).decode("utf-8")
+
         return base64_data
-        
+
     except Exception as e:
         print(f"文件下载或转换base64失败, url：{url} \n Reason：{e}")
         raise e
 
+
 # 批量 下载网络文件并转为base64编码
-def batch_download_encode_base64(urls: list,skip_error=True):
+def batch_download_encode_base64(urls: list, skip_error=True):
     """
     批量下载网络文件并转为base64编码
-    
+
     Args:
         urls: 文件URL列表
         skip_error: 是否跳过错误文件，默认True
 
     Returns:
         list: 包含每个文件base64编码的列表
-        
+
     Raises:
         Exception: 下载失败时抛出异常
     """
