@@ -26,7 +26,7 @@ filekits/
     └── pd_util.py          # pandas数据处理工具
 ```
 
-## 📦 安装/更新/卸载
+## 📦 安装/更新
 
 ```bash
 pip install --upgrade filekits
