@@ -18,7 +18,12 @@ from .down_load import (
 )
 
 # 文件夹操作相关
-from .folder import find_files, clear_folder, find_parent_folder
+from .folder import (
+    find_files, 
+    clear_folder, 
+    find_parent_folder, 
+    print_folder_tree 
+)
 
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
@@ -43,5 +48,6 @@ __all__ = [
     # 文件夹操作
     'find_files',
     'clear_folder',
-    'find_parent_folder'
+    'find_parent_folder',
+    'print_folder_tree'
 ]

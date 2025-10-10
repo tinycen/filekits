@@ -50,3 +50,73 @@ def find_parent_folder( target_folder_name ) :
     
     # 如果没有找到目标文件夹，返回None
     return None
+
+
+# 递归打印目录树结构，可选择导出为文件
+def print_folder_tree(folder_path, indent='', output_file=None):
+    """
+    递归打印文件夹树结构
+    
+    参数:
+        folder_path: 要遍历的起始路径
+        indent: 缩进字符，用于递归调用
+        output_file: 输出文件路径，如果提供则将结果写入文件，否则打印到控制台
+    """
+    # 确保路径存在
+    if not os.path.exists(folder_path):
+        error_msg = f"错误: 路径 '{folder_path}' 不存在"
+        if output_file:
+            with open(output_file, 'a', encoding='utf-8') as f:  # type: ignore
+                f.write(error_msg + '\n')
+        else:
+            print(error_msg)
+        return
+    
+    # 判断是否为Markdown格式（通过文件扩展名）
+    is_markdown = output_file is not None and output_file.lower().endswith('.md')
+    
+    # 如果是Markdown格式且是第一次调用，写入标题和代码块开始标记
+    if is_markdown and indent == '':
+        with open(output_file, 'w', encoding='utf-8') as f:  # type: ignore
+            f.write(f"# 目录树结构: {os.path.basename(folder_path)}\n\n")
+            f.write("```\n")
+    
+    # 获取目录中的所有项目，并排序
+    items = sorted(os.listdir(folder_path))
+    
+    # 遍历目录中的每个项目
+    for i, item in enumerate(items):
+        item_path = os.path.join(folder_path, item)
+        
+        # 判断是否是最后一个项目，用于决定树形结构符号
+        is_last = i == len(items) - 1
+        
+        # 根据是否是最后一个项目选择不同的树形符号
+        if is_last:
+            prefix = "└── "
+            next_indent = indent + "    "
+        else:
+            prefix = "├── "
+            next_indent = indent + "│   "
+        
+        # 构建输出行
+        if os.path.isdir(item_path):
+            line = f"{indent}{prefix}{item}/"
+        else:
+            line = f"{indent}{prefix}{item}"
+        
+        # 输出到控制台或文件
+        if output_file:
+            with open(output_file, 'a', encoding='utf-8') as f:  # type: ignore
+                f.write(line + '\n')
+        else:
+            print(line)
+        
+        # 如果是目录，递归调用
+        if os.path.isdir(item_path):
+            print_folder_tree(item_path, next_indent, output_file)
+    
+    # 如果是Markdown格式且是第一次调用，写入代码块结束标记
+    if is_markdown and indent == '':
+        with open(output_file, 'a', encoding='utf-8') as f:  # type: ignore
+            f.write("```\n")
