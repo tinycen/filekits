@@ -1,6 +1,11 @@
 import os
 import base64
+import requests
 from funcguard.tools import send_request
+
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+}
 
 
 def _send_request_with_retry(url, headers=None):
@@ -16,9 +21,7 @@ def _send_request_with_retry(url, headers=None):
         response: 请求响应对象或解析后的数据
     """
     if headers is None:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-        }
+        headers = DEFAULT_HEADERS
 
     # 为阿里cdn添加特殊处理
     # if "https://cbu01.alicdn.com" in url:
@@ -226,3 +229,34 @@ def batch_download_encode_base64(urls: list, skip_error=True):
             else:
                 raise e
     return base64_list
+
+
+# 检查url是否有效
+def check_url_valid(url, headers=None, max_retries=3):
+    """
+    检查url是否有效
+
+    Args:
+        url: 文件URL
+        headers: 自定义请求头（可选）
+        max_retries: 最大重试次数，默认3次
+
+    Returns:
+        bool: 如果URL有效则返回True，否则返回False
+    """
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.head(url, headers=headers, timeout=60, allow_redirects=True)
+            return response.status_code == 200
+        except requests.exceptions.RequestException as e:
+            print(str(e))
+            if attempt < max_retries - 1:
+                print(f"URL检查失败，正在重试 ({attempt + 1}/{max_retries})\n{url}")
+                continue
+            else:
+                print(f"URL检查失败，已达到最大重试次数 ({max_retries}):\n{url}")
+                return False
+    return False

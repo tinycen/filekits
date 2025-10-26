@@ -14,7 +14,8 @@ from .down_load import (
     download_file,
     download_files,
     download_encode_base64,
-    batch_download_encode_base64
+    batch_download_encode_base64,
+    check_url_valid,
 )
 
 # 文件夹操作相关
@@ -44,6 +45,7 @@ __all__ = [
     'download_files',
     'download_encode_base64',
     'batch_download_encode_base64',
+    'check_url_valid',
     
     # 文件夹操作
     'find_files',
