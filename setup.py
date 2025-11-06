@@ -9,7 +9,7 @@ except FileNotFoundError:
 
 setup(  
     name='filekits',
-    version='0.1.9',
+    version='0.2.0',
     packages=find_packages(),
     install_requires=[
         'pandas',

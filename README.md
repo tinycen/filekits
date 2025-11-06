@@ -106,8 +106,13 @@ save_json(data, 'data.json')
 ```python
 from filekits.base_io import save_txt
 
+# 保存列表到txt文件
 my_list = ['line1', 'line2', 'line3']
 save_txt(my_list, 'output.txt')
+
+# 保存字符串到txt文件
+my_text = "这是一段文本内容"
+save_txt(my_text, 'output.txt')
 ```
 
 ### 3. 文件夹操作
