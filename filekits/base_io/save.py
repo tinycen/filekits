@@ -24,8 +24,15 @@ def save_json( data_dict, output_file = 'output.json' ) :
         f.write( json_str )
 
 
-# 列表保存为txt文件
-def save_txt( merged_list , output_file = 'output.txt' ) :
+# 保存为txt文件（支持列表和文本字符串）
+def save_txt( data , output_file = 'output.txt' ) :
     with open( output_file , 'w' , encoding = 'utf-8' ) as f :
-        for item in merged_list :
-            f.write( str( item ) + '\n' )
+        # 如果是字符串类型，直接写入
+        if isinstance( data , str ) :
+            f.write( data )
+        # 如果是列表类型，逐行写入
+        elif isinstance( data , list ) :
+            for item in data :
+                f.write( str( item ) + '\n' )
+        else :
+            raise TypeError( "输入数据必须是字符串或列表类型" )
