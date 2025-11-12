@@ -22,6 +22,31 @@ def save_df( data , output_path ) :
         raise ValueError( "请输入正确的文件名后缀，支持 .xlsx、.csv 和 .json " )
     return
 
+
+# 将DataFrame或列表，按照批次大小，保存为指定格式的文件
+def batch_save_df( data , batch_size, output_path ) :
+    # 如果输入是列表，转换为DataFrame
+    if isinstance( data , list ) :
+        df = pd.DataFrame( data )
+    # 如果输入已经是DataFrame，直接使用
+    elif isinstance( data , pd.DataFrame ) :
+        df = data
+    else :
+        raise TypeError( "输入数据必须是列表List或DataFrame类型" )
+    # 计算批次数量
+    num_batches = len( df ) // batch_size + ( 1 if len( df ) % batch_size != 0 else 0 )
+    # 按批次保存
+    for i in range( num_batches ) :
+        start_idx = i * batch_size
+        end_idx = ( i + 1 ) * batch_size
+        batch_df = df[ start_idx : end_idx ]
+        # 生成批次文件名
+        batch_output_path = f"{output_path.split('.')[0]}_{i+1}.{output_path.split('.')[-1]}"
+        # 保存批次数据
+        save_df( batch_df , batch_output_path )
+    return
+
+
 # 字典保存为json文件
 def save_json( data_dict, output_file = 'output.json' ) :
     # 将字典转换为JSON格式字符串
