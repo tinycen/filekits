@@ -15,8 +15,20 @@ def pre_check_df( data ) :
         raise TypeError( "输入数据必须是列表List或DataFrame类型" )
 
 
-# 将DataFrame或列表保存为指定格式的文件
 def save_df( data , output_path , charset = 'utf-8', sepset = None, header = True ) :
+    """
+    将DataFrame或列表保存为指定格式的文件
+    
+    参数:
+        data: 输入数据，可以是DataFrame或列表
+        output_path: 输出文件路径，支持.xlsx、.csv、.txt、.json格式
+        charset: 文件编码，默认为'utf-8'
+        sepset: 分隔符设置，用于csv/txt文件，默认为None（使用pandas默认设置）
+        header: 是否保留表头，默认为True（保留表头）
+    
+    返回:
+        None
+    """
     df = pre_check_df( data )
 
     if ".xlsx" in output_path :
@@ -37,8 +49,21 @@ def save_df( data , output_path , charset = 'utf-8', sepset = None, header = Tru
     return
 
 
-# 将DataFrame或列表，按照批次大小，保存为指定格式的文件
 def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = None, header = True ) :
+    """
+    将DataFrame或列表，按照批次大小，保存为指定格式的文件
+    
+    参数:
+        data: 输入数据，可以是DataFrame或列表
+        batch_size: 每个批次的大小（行数）
+        output_path: 输出文件路径，支持.xlsx、.csv、.txt、.json格式
+        charset: 文件编码，默认为'utf-8'
+        sepset: 分隔符设置，用于csv/txt文件，默认为None（使用pandas默认设置）
+        header: 是否保留表头，默认为True（保留表头）
+    
+    返回:
+        None
+    """
     df = pre_check_df( data )
     
     # 处理批次大小不合理的情况
