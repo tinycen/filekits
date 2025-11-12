@@ -3,7 +3,7 @@
 # 该模块封装了常用的文件操作功能，包括文件保存、加载、下载和文件夹管理
 
 # 文件保存相关
-from .save import save_df, save_json, save_txt
+from .save import save_df, save_json, save_txt , batch_save_df
 
 # 文件加载相关  
 from .load import load_txt, load_yaml, load_excel, load_json, load_base64
@@ -32,6 +32,7 @@ __all__ = [
     'save_df',
     'save_json', 
     'save_txt',
+    'batch_save_df',
     
     # 文件加载
     'load_txt',
