@@ -16,18 +16,18 @@ def pre_check_df( data ) :
 
 
 # 将DataFrame或列表保存为指定格式的文件
-def save_df( data , output_path , charset = 'utf-8', sepset = None ) :
+def save_df( data , output_path , charset = 'utf-8', sepset = None, header = True ) :
     df = pre_check_df( data )
 
     if ".xlsx" in output_path :
-        df.to_excel( output_path , index = False )
+        df.to_excel( output_path , index = False , header = header )
 
     elif ".csv" in output_path or ".txt" in output_path :
         # 只有在指定了分隔符的情况下才使用，否则使用pandas默认设置
         if sepset is not None:
-            df.to_csv( output_path , index = False , encoding = charset , sep = sepset )
+            df.to_csv( output_path , index = False , encoding = charset , sep = sepset , header = header )
         else:
-            df.to_csv( output_path , index = False , encoding = charset )
+            df.to_csv( output_path , index = False , encoding = charset , header = header )
 
     elif ".json" in output_path :
         df.to_json( output_path , orient = 'records' , force_ascii = False , indent = 4 )
@@ -38,7 +38,7 @@ def save_df( data , output_path , charset = 'utf-8', sepset = None ) :
 
 
 # 将DataFrame或列表，按照批次大小，保存为指定格式的文件
-def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = None ) :
+def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = None, header = True ) :
     df = pre_check_df( data )
     
     # 处理批次大小不合理的情况
@@ -65,7 +65,7 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
         # 打印即将保存的批次信息
         print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1}" )
         # 保存批次数据
-        save_df( batch_df , batch_output_path , charset = charset , sepset = sepset )
+        save_df( batch_df , batch_output_path , charset = charset , sepset = sepset , header = header )
     return
 
 
