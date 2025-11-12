@@ -48,7 +48,7 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
     total_rows = len( df )
     # 计算批次数量
     num_batches = ( total_rows + batch_size - 1 ) // batch_size  # 更简洁的计算方式
-    print( f"Total rows : {total_rows} , batch size : {batch_size} , split batches : {num_batches} ." )
+    print( f"Total rows : {total_rows} , batch size : {batch_size} , split batches : {num_batches}" )
 
     # 按批次保存
     for i in range( num_batches ) :
@@ -59,7 +59,7 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
         # 生成批次文件名
         batch_output_path = f"{base_name}_{i+1}{extension}"
         # 打印即将保存的批次信息
-        print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1} ({end_idx-start_idx} rows) to {batch_output_path} ." )
+        print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1} ({end_idx-start_idx} rows)" )
         # 保存批次数据
         save_df( batch_df , batch_output_path , charset = charset , sepset = sepset )
     return
