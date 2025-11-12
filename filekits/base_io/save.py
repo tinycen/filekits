@@ -1,9 +1,17 @@
 import json
 import pandas as pd
 
-# 将列表转为df并保存为指定格式的文件
-def save_df( merged_list , output_path ) :
-    df = pd.DataFrame( merged_list )
+# 将DataFrame或列表保存为指定格式的文件
+def save_df( data , output_path ) :
+    # 如果输入是列表，转换为DataFrame
+    if isinstance( data , list ) :
+        df = pd.DataFrame( data )
+    # 如果输入已经是DataFrame，直接使用
+    elif isinstance( data , pd.DataFrame ) :
+        df = data
+    else :
+        raise TypeError( "输入数据必须是列表List或DataFrame类型" )
+    
     if ".xlsx" in output_path :
         df.to_excel( output_path , index = False )
     elif ".csv" in output_path :
