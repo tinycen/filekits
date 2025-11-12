@@ -2,23 +2,32 @@ import os
 import json
 import pandas as pd
 
-# 将DataFrame或列表保存为指定格式的文件
-def save_df( data , output_path ) :
+
+# 检查即将保存的数据
+def pre_check_df( data ) :
     # 如果输入是列表，转换为DataFrame
     if isinstance( data , list ) :
-        df = pd.DataFrame( data )
+        return pd.DataFrame( data )
     # 如果输入已经是DataFrame，直接使用
     elif isinstance( data , pd.DataFrame ) :
-        df = data
+        return data
     else :
         raise TypeError( "输入数据必须是列表List或DataFrame类型" )
-    
+
+
+# 将DataFrame或列表保存为指定格式的文件
+def save_df( data , output_path ) :
+    df = pre_check_df( data )
+
     if ".xlsx" in output_path :
         df.to_excel( output_path , index = False )
+
     elif ".csv" in output_path :
         df.to_csv( output_path , index = False )
+
     elif ".json" in output_path :
         df.to_json( output_path , orient = 'records' , force_ascii = False , indent = 4 )
+        
     else :
         raise ValueError( "请输入正确的文件名后缀，支持 .xlsx、.csv 和 .json " )
     return
@@ -26,19 +35,7 @@ def save_df( data , output_path ) :
 
 # 将DataFrame或列表，按照批次大小，保存为指定格式的文件
 def batch_save_df( data , batch_size, output_path ) :
-    # 如果输入是列表，转换为DataFrame
-    if isinstance( data , list ) :
-        df = pd.DataFrame( data )
-    # 如果输入已经是DataFrame，直接使用
-    elif isinstance( data , pd.DataFrame ) :
-        df = data
-    else :
-        raise TypeError( "输入数据必须是列表List或DataFrame类型" )
-    
-    # 处理空数据情况
-    if len( df ) == 0 :
-        print( "警告：输入数据为空，不生成任何文件" )
-        return
+    df = pre_check_df( data )
     
     # 处理批次大小不合理的情况
     if batch_size <= 0 :
