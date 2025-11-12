@@ -63,7 +63,7 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
         # 生成批次文件名
         batch_output_path = f"{base_name}_{i+1}{extension}"
         # 打印即将保存的批次信息
-        print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1} ({end_idx-start_idx} rows)" )
+        print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1}" )
         # 保存批次数据
         save_df( batch_df , batch_output_path , charset = charset , sepset = sepset )
     return
