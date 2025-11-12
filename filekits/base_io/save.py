@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 
@@ -33,15 +34,30 @@ def batch_save_df( data , batch_size, output_path ) :
         df = data
     else :
         raise TypeError( "输入数据必须是列表List或DataFrame类型" )
+    
+    # 处理空数据情况
+    if len( df ) == 0 :
+        print( "警告：输入数据为空，不生成任何文件" )
+        return
+    
+    # 处理批次大小不合理的情况
+    if batch_size <= 0 :
+        raise ValueError( "批次大小必须大于0" )
+    
+    # 使用os.path模块更安全地处理文件路径
+    base_name = os.path.splitext( output_path )[0]
+    extension = os.path.splitext( output_path )[1]
+    
     # 计算批次数量
-    num_batches = len( df ) // batch_size + ( 1 if len( df ) % batch_size != 0 else 0 )
+    num_batches = ( len( df ) + batch_size - 1 ) // batch_size  # 更简洁的计算方式
+    
     # 按批次保存
     for i in range( num_batches ) :
         start_idx = i * batch_size
-        end_idx = ( i + 1 ) * batch_size
+        end_idx = min( ( i + 1 ) * batch_size , len( df ) )  # 防止越界
         batch_df = df[ start_idx : end_idx ]
         # 生成批次文件名
-        batch_output_path = f"{output_path.split('.')[0]}_{i+1}.{output_path.split('.')[-1]}"
+        batch_output_path = f"{base_name}_{i+1}{extension}"
         # 保存批次数据
         save_df( batch_df , batch_output_path )
     return
