@@ -253,10 +253,17 @@ def check_url_valid(url, headers=None, max_retries=3):
             return response.status_code == 200
         except requests.exceptions.RequestException as e:
             print(str(e))
-            if attempt < max_retries - 1:
-                print(f"URL检查失败，正在重试 ({attempt + 1}/{max_retries})\n{url}")
-                continue
-            else:
-                print(f"URL检查失败，已达到最大重试次数 ({max_retries}):\n{url}")
-                return False
+            # HEAD请求失败，立即尝试GET请求作为降级方案
+            print(f"HEAD请求失败，尝试使用GET请求检查URL:\n{url}")
+            try:
+                response = requests.get(url, headers=headers, timeout=60, allow_redirects=True, stream=True)
+                return response.status_code == 200
+            except requests.exceptions.RequestException as get_e:
+                print(f"GET请求也失败:\n{str(get_e)}")
+                if attempt < max_retries - 1:
+                    print(f"URL检查失败，正在重试 ({attempt + 1}/{max_retries})\n{url}")
+                    continue
+                else:
+                    print(f"URL检查失败，已达到最大重试次数 ({max_retries}):\n{url}")
+                    return False
     return False
