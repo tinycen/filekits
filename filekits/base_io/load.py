@@ -3,9 +3,11 @@ import yaml
 import base64
 import openpyxl
 import pandas as pd
+import numpy as np
 
 import cv2
 from PIL import Image
+from typing import Union, overload, Literal
 
 
 # 读取txt文档，返回列表
@@ -72,7 +74,15 @@ def load_base64(file_path):
 
 
 # 读取图像
-def load_image( image_path , backend="PIL" ) :
+# 使用 @overload 装饰器进行类型重载，以便静态类型检查器（如 Pyright）
+# 能够根据 backend 参数的值精确推断返回类型，避免类型检查错误
+@overload
+def load_image( image_path , backend: Literal["PIL"] = "PIL" ) -> Image.Image : ...
+
+@overload
+def load_image( image_path , backend: Literal["cv2"] ) -> np.ndarray : ...
+
+def load_image( image_path , backend="PIL" ) -> Union[Image.Image, np.ndarray] :
     """
     读取图像文件或处理图像对象
     
