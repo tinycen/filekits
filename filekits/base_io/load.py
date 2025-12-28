@@ -4,6 +4,10 @@ import base64
 import openpyxl
 import pandas as pd
 
+import cv2
+from PIL import Image
+
+
 # 读取txt文档，返回列表
 def load_txt(file_path, lower_list=0, return_type="list"):
     f = open(file_path, "r", encoding='utf-8')
@@ -65,3 +69,32 @@ def load_base64(file_path):
         file_data = file.read()
     base64_data = base64.b64encode(file_data).decode('utf-8')
     return base64_data
+
+
+# 读取图像
+def load_image( image_path , backend="PIL" ) :
+    """
+    读取图像文件或处理图像对象
+    
+    Args:
+        image_path: 图像文件路径(str)或图像对象(PIL.Image/np.ndarray)
+        backend: 读取后端，可选 "PIL" 或 "cv2"，默认 "PIL"
+    
+    Returns:
+        图像对象
+        - PIL图像对象有 mode 属性
+        - OpenCV图像(numpy数组)有 shape 属性
+    """
+    if isinstance( image_path , str ) :
+        if backend == "PIL" :
+            image = Image.open( image_path )
+        elif backend == "cv2" :
+            image = cv2.imread( image_path )
+        else:
+            raise ValueError(f"不支持的读取方法: {backend}. 请使用 'PIL' 或 'cv2'")
+    elif hasattr(image_path, 'mode') or hasattr(image_path, 'shape') :
+        # 如果 image_path 是图像对象(PIL.Image或np.ndarray)，直接使用
+        image = image_path
+    else:
+        raise TypeError(f"不支持的图像类型: {type(image_path)}. 请提供文件路径或图像对象")
+    return image
