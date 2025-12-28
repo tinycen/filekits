@@ -17,7 +17,8 @@ def draw_mask( image_path , modify_info , output_folder , output_path , expansio
     if expansion_area == 0 :
         # 创建一个全黑的图片，与原始图片大小相同
         black_image = Image.new( 'RGB' , (width , height) , color = (0 , 0 , 0) )
-        cropped_img_path = new_area = ""
+        cropped_img_path = ""
+        new_area = modify_info
     else :
         # 扩展mask指定像素的区域
         new_startX = max( 0 , startX - expansion_area )
