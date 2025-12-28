@@ -71,3 +71,4 @@ def paste_logo( image_path , logo_path , output_path, choice=[ 'top_left' , 'top
     logo.close()
 
     return output_path
+
