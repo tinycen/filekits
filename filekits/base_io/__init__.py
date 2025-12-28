@@ -6,7 +6,7 @@
 from .save import save_df, save_json, save_txt , batch_save_df
 
 # 文件加载相关  
-from .load import load_txt, load_yaml, load_excel, load_json, load_base64
+from .load import load_txt, load_yaml, load_excel, load_json, load_base64, load_image
 
 # 文件下载相关
 # 使用括号格式是为了提高多函数导入的可读性
@@ -40,6 +40,7 @@ __all__ = [
     'load_excel',
     'load_json',
     'load_base64',
+    'load_image',
     
     # 文件下载
     'download_file',
