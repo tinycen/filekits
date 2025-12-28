@@ -2,3 +2,5 @@ pandas
 openpyxl
 pyyaml
 funcguard
+opencv-python
+Pillow

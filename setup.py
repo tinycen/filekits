@@ -7,16 +7,18 @@ try:
 except FileNotFoundError:
     long_description = 'Filekits - 一个简洁高效的Python文件处理工具包，支持多种文件格式读写、网络文件下载、文件夹操作等常用功能。'
 
+# 读取requirements.txt文件
+try:
+    with open('requirements.txt', 'r', encoding='utf-8') as f:
+        install_requires = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+except FileNotFoundError:
+    install_requires = []
+
 setup(  
     name='filekits',
     version='0.2.4',
     packages=find_packages(),
-    install_requires=[
-        'pandas',
-        'openpyxl',
-        'pyyaml',
-        'funcguard',
-    ],
+    install_requires=install_requires,
     author='tinycen',
     author_email='sky_ruocen@qq.com',
     description='一个简洁高效的Python文件处理工具包，提供文件读写、网络下载、文件夹操作等常用功能',
