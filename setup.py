@@ -1,11 +1,13 @@
 from setuptools import setup, find_packages
 
+short_description = 'Filekits - Python文件处理工具包，提供文件读写、网络下载、文件夹操作、图片处理等常用功能'
+
 # 读取README文件
 try:
     with open('README.md', 'r', encoding='utf-8') as f:
         long_description = f.read()
 except FileNotFoundError:
-    long_description = 'Filekits - 一个简洁高效的Python文件处理工具包，支持多种文件格式读写、网络文件下载、文件夹操作等常用功能。'
+    long_description = short_description
 
 # 读取requirements.txt文件
 try:
@@ -16,12 +18,12 @@ except FileNotFoundError:
 
 setup(  
     name='filekits',
-    version='0.2.4',
+    version='0.2.5',
     packages=find_packages(),
     install_requires=install_requires,
     author='tinycen',
     author_email='sky_ruocen@qq.com',
-    description='一个简洁高效的Python文件处理工具包，提供文件读写、网络下载、文件夹操作等常用功能',
+    description=short_description,
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/tinycen/filekits',

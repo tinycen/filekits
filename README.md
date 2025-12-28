@@ -1,6 +1,6 @@
 # FileKits - Python文件处理工具包
 
-一个简洁高效的Python文件处理工具包，提供了文件读写、网络下载、文件夹操作等常用功能，让文件处理变得更加简单。
+一个简洁高效的Python文件处理工具包，提供了文件读写、网络下载、文件夹操作、图像处理等常用功能，让文件处理变得更加简单。
 
 ## 🚀 功能特性
 
@@ -8,20 +8,29 @@
 - **网络下载**：支持单文件和多文件下载，自动重试机制
 - **文件夹操作**：文件查找、文件夹清理等实用功能
 - **数据处理**：字典工具、pandas数据处理辅助功能
+- **图像处理**：支持图像格式转换、裁剪、缩放、绘制、合成等图像处理功能
 
 ## 📁 项目结构
 
 ```
 filekits/
 ├── __init__.py
-├── base_io/                 # 基础IO操作模块
-│   ├── __init__.py
+├── base_io/               
+│   ├── __init__.py         # 基础IO操作模块
 │   ├── load.py             # 文件读取功能
 │   ├── save.py             # 文件保存功能
 │   ├── folder.py           # 文件夹操作
 │   └── down_load.py        # 网络文件下载
-└── utils/                   # 工具模块
-    ├── __init__.py
+├── image/                 
+│   ├── __init__.py         # 图像处理模块
+│   ├── convert.py          # 图像格式转换
+│   ├── draw.py             # 图像绘制功能
+│   ├── img_crop.py         # 图像裁剪
+│   ├── img_fill.py         # 图像填充/合成
+│   ├── img_info.py         # 图像信息获取
+│   └── img_scale.py        # 图像缩放
+└── utils/                 
+    ├── __init__.py         # 工具模块
     ├── dict_util.py        # 字典处理工具
     └── pd_util.py          # pandas数据处理工具
 ```
@@ -73,6 +82,20 @@ df = load_excel('data.xlsx', return_type="df")
 
 # 读取为openpyxl工作表
 wb, sheet, rows = load_excel('data.xlsx', return_type="sheet")
+```
+
+#### 读取图像文件
+```python
+from filekits.base_io import load_image
+
+# 使用PIL后端读取图像（返回PIL.Image对象）
+img = load_image('image.jpg', backend="PIL")
+
+# 使用OpenCV后端读取图像（返回numpy数组）
+img_cv = load_image('image.jpg', backend="cv2")
+
+# 也可以直接传入图像对象
+img_obj = load_image(pil_image_obj)  # 或 load_image(cv2_image_array)
 ```
 
 ### 2. 文件保存
@@ -220,6 +243,79 @@ clean_data = remove_keys(data, ["password"])
 # 结果: {"name": "Alice", "age": 25}
 ```
 
+### 6. 图像处理
+
+#### 图像格式转换
+```python
+from filekits.image import to_jpg
+
+# 将PNG、GIF、WebP等格式转换为JPG
+jpg_path = to_jpg('image.png', output_folder='./output', delete_origin=False)
+```
+
+#### 图像裁剪
+```python
+from filekits.image import crop_transparent
+
+# 删除PNG图片的透明区域
+cropped_path = crop_transparent('image.png')
+
+# 同时转换为JPG格式（透明背景变为白色）
+cropped_jpg = crop_transparent('image.png', turn_jpg=True)
+```
+
+#### 图像缩放
+```python
+from filekits.image import scale_image
+
+# 将第2张图片强制缩放到和第1张图片一样大小
+scale_image('reference.jpg', 'target.jpg')
+```
+
+#### 图像绘制
+```python
+from filekits.image import draw_mask, add_text
+
+# 绘制遮罩图像（指定区域为白色，其余为黑色）
+cropped_path, area = draw_mask('image.jpg', 
+                              {'startX': 100, 'startY': 100, 'endX': 300, 'endY': 300},
+                              './output', 'mask.jpg')
+
+# 在图像上添加文字
+font_path = {'Bold': 'font_bold.ttf', 'Medium': 'font_medium.ttf'}
+box_infos = [{
+    'text_translated': 'Hello World',
+    'box': [(50, 50), (200, 50), (200, 100), (50, 100)],
+    'width': 150, 'height': 50, 'short_side': 40
+}]
+output_path = add_text('image.jpg', box_infos, font_path, 'output.jpg')
+```
+
+#### 图像合成
+```python
+from filekits.image import paste_image, paste_logo
+
+# 在指定位置粘贴图像
+from PIL import Image
+base_img = Image.open('base.jpg')
+paste_img = Image.open('paste.png')
+result = paste_image(base_img, paste_img, (100, 100, 300, 300))
+result.save('result.jpg')
+
+# 在图像四角随机添加水印
+paste_logo('image.jpg', 'logo.png', 'output.jpg', 
+           choice=['top_left', 'top_right', 'bottom_left', 'bottom_right'])
+```
+
+#### 图像信息
+```python
+from filekits.image import is_dark_color
+
+# 判断颜色是否为深色（用于文字颜色选择）
+is_dark = is_dark_color([100, 100, 100])  # RGB值
+```
+
+
 ## ⚙️ 配置说明
 
 ### 网络下载配置
@@ -231,7 +327,7 @@ clean_data = remove_keys(data, ["password"])
 - **文本文件**：.txt
 - **数据文件**：.json, .yaml, .yml
 - **表格文件**：.xlsx, .csv
-- **图片文件**：.jpg, .png, .gif, .bmp等（通过下载功能）
+- **图片文件**：.jpg, .png, .gif, .bmp, .webp等（通过下载功能和图像处理模块）
 
 ## 📝 注意事项
 
