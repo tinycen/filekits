@@ -13,7 +13,7 @@ from typing import Union, overload, Literal
 # 读取txt文档，返回列表
 def load_txt(file_path, lower_list=0, return_type="list"):
     f = open(file_path, "r", encoding='utf-8')
-    text = f.read()
+    text = f.read().strip()
     f.close()
     if return_type == "str":
         return text
