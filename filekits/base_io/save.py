@@ -46,6 +46,8 @@ def save_df( data , output_path , charset = 'utf-8', sepset = None, header = Tru
 
     else :
         raise ValueError( "请输入正确的文件名后缀，支持 .xlsx、.csv 和 .json " )
+
+    print(f"File saved to: {output_path}")
     return
 
 
@@ -102,6 +104,7 @@ def save_json( data_dict, output_file = 'output.json' ) :
     with open( output_file, 'w', encoding = 'utf-8' ) as f :
         # 将JSON字符串写入文件
         f.write( json_str )
+    print(f"File saved to: {output_file}")
 
 
 # 保存为txt文件（支持列表和文本字符串）
@@ -116,3 +119,4 @@ def save_txt( data , output_file = 'output.txt' ) :
                 f.write( str( item ) + '\n' )
         else :
             raise TypeError( "输入数据必须是字符串或列表类型" )
+    print(f"File saved to: {output_file}")
