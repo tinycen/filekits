@@ -97,9 +97,9 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
 
 
 # 字典保存为json文件
-def save_json( data_dict, output_file = 'output.json' ) :
+def save_json( data_dict, output_file = 'output.json', indent = 4 ) :
     # 将字典转换为JSON格式字符串
-    json_str = json.dumps( data_dict, ensure_ascii = False, indent = 4 )
+    json_str = json.dumps( data_dict, ensure_ascii = False, indent = indent )
     # 打开文件，以写入模式打开
     with open( output_file, 'w', encoding = 'utf-8' ) as f :
         # 将JSON字符串写入文件
