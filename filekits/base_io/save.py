@@ -108,8 +108,10 @@ def save_json( data_dict, output_file = 'output.json', indent = 4 ) :
 
 
 # 保存为txt文件（支持列表和文本字符串）
-def save_txt( data , output_file = 'output.txt' ) :
-    with open( output_file , 'w' , encoding = 'utf-8' ) as f :
+def save_txt( data , output_file = 'output.txt' , overwrite = True ) :
+    # 根据overwrite参数选择写入模式：'w'覆盖写入，'a'追加写入
+    mode = 'w' if overwrite else 'a'
+    with open( output_file , mode , encoding = 'utf-8' ) as f :
         # 如果是字符串类型，直接写入
         if isinstance( data , str ) :
             f.write( data )
