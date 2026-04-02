@@ -11,8 +11,11 @@ except ImportError as e:
     if "libGL.so.1" in str(e):
         raise ImportError(
             "OpenCV 导入失败：缺少系统库 libGL.so.1\n"
-            "请根据您的 Linux 发行版执行以下命令安装：\n"
-            "  Ubuntu/Debian: sudo apt-get install -y libgl1-mesa-glx\n"
+            "解决方案一（推荐服务器/无GUI环境）：\n"
+            "  pip uninstall opencv-python -y\n"
+            "  pip install opencv-python-headless\n"
+            "解决方案二（需要GUI功能）：\n"
+            "  Ubuntu/Debian: sudo apt-get update && sudo apt-get install -y libgl1\n"
             "  CentOS/RHEL/Fedora: sudo yum install -y mesa-libGL\n"
             "安装完成后重新运行程序。"
         ) from e
