@@ -32,6 +32,15 @@ def _send_request_with_retry(url, headers=None):
         method="GET", url=url, headers=headers, return_type="response"
     )
 
+    # 检查响应状态码，403 表示访问被拒绝，通常是下载失败
+    if response.status_code == 403:
+        raise requests.HTTPError(
+            f"下载失败，服务器返回 403 Forbidden，URL: {url}"
+        )
+
+    # 检查其他 HTTP 错误状态码
+    response.raise_for_status()
+
     return response
 
 
