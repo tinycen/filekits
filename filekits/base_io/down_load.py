@@ -21,15 +21,13 @@ def _send_request_with_retry(url, headers=None):
     Returns:
         response: 请求响应对象或解析后的数据
     """
-    if headers is None:
-        headers = DEFAULT_HEADERS
 
     # 为阿里cdn添加特殊处理
     # if "https://cbu01.alicdn.com" in url:
     #     response = send_request(method='GET', url=url, headers=headers, return_type=return_type)
 
     response = send_request(
-        method="GET", url=url, headers=headers, return_type="response"
+        method="GET", url=url, headers=headers, return_type="response", curl_fallback = True
     )
 
     # 检查响应状态码，403 表示访问被拒绝，通常是下载失败
