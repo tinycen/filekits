@@ -18,7 +18,7 @@ except FileNotFoundError:
 
 setup(  
     name='filekits',
-    version='0.2.8',
+    version='0.2.9',
     packages=find_packages(),
     install_requires=install_requires,
     author='tinycen',
@@ -32,7 +32,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.12',
+    python_requires='>=3.10',
     include_package_data=True,
     zip_safe=False,
 )
