@@ -187,28 +187,14 @@ def download_files(
 def download_encode_base64(url):
     """
     下载网络文件并直接返回base64编码
-
-    Args:
-        url: 文件URL
-
-    Returns:
-        str: 文件的base64编码字符串
-
-    Raises:
-        Exception: 下载失败时抛出异常
     """
-    try:
-        response = _send_request_with_retry(url)
+    response = _send_request_with_retry(url)
 
-        # 读取文件内容并转为base64
-        file_data = response.content
-        base64_data = base64.b64encode(file_data).decode("utf-8")
+    # 读取文件内容并转为base64
+    file_data = response.content
+    base64_data = base64.b64encode(file_data).decode("utf-8")
 
-        return base64_data
-
-    except Exception as e:
-        print(f"文件下载或转换base64失败, url：{url} \n Reason：{e}")
-        raise e
+    return base64_data
 
 
 # 批量 下载网络文件并转为base64编码
