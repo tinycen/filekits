@@ -9,14 +9,14 @@ DEFAULT_HEADERS = {
 }
 
 
-def _send_request_with_retry(url, headers=None):
+def _send_request_with_retry(url, headers=None, stream=False):
     """
     内部方法：发送带重试的请求，处理阿里CDN特殊逻辑
 
     Args:
         url: 请求的URL
         headers: 自定义请求头（可选）
-        return_type: 返回类型，可选值：'json', 'text', 'response'
+        stream: 是否使用流式传输，默认 False
 
     Returns:
         response: 请求响应对象或解析后的数据
@@ -27,7 +27,8 @@ def _send_request_with_retry(url, headers=None):
     #     response = send_request(method='GET', url=url, headers=headers, return_type=return_type)
 
     response = send_request(
-        method="GET", url=url, headers=headers, return_type="response", curl_fallback = True
+        method="GET", url=url, headers=headers, return_type="response",
+        curl_fallback=True, stream=stream
     )
 
     # 检查响应状态码，403 表示访问被拒绝，通常是下载失败
@@ -42,8 +43,28 @@ def _send_request_with_retry(url, headers=None):
     return response
 
 
+def _write_response_to_file(response, file_path: str, chunk_size: int = 1024):
+    """
+    将响应内容写入文件，支持流式分块写入
+
+    Args:
+        response: 请求响应对象（requests.Response 或 curl_cffi 响应）
+        file_path: 目标文件路径
+        chunk_size: 分块大小（字节），默认 1024
+    """
+    with open(file_path, "wb") as f:
+        if hasattr(response, "iter_content"):
+            # 支持 iter_content 的响应对象，使用流式写入
+            for chunk in response.iter_content(chunk_size):
+                if chunk:
+                    f.write(chunk)
+        else:
+            # 不支持 iter_content 的响应对象（如 curl_cffi），直接写入 content
+            f.write(response.content)
+
+
 # 下载网络文件
-def download_file(url, download_dir, file_name="", return_type="name"):
+def download_file(url, download_dir, file_name="", return_type="name", stream=True):
     """
     使用 send_request 自动重试功能下载网络文件
 
@@ -55,6 +76,7 @@ def download_file(url, download_dir, file_name="", return_type="name"):
             - "name": 仅返回文件名（默认）
             - "path": 仅返回完整路径
             - "both": 返回(路径, 文件名)元组
+        stream: 是否使用流式下载（默认True，适用于大文件）
 
     Returns:
         根据return_type参数返回：
@@ -81,13 +103,10 @@ def download_file(url, download_dir, file_name="", return_type="name"):
         print(f"文件 {file_name} 已经存在，跳过下载")
     else:
         try:
-            response = _send_request_with_retry(url)
+            response = _send_request_with_retry(url, stream=stream)
 
-            # 以二进制模式写入文件
-            with open(file_path, "wb") as file:
-                for chunk in response.iter_content(1024):
-                    if chunk:  # 过滤掉空chunk
-                        file.write(chunk)
+            # 使用辅助函数写入文件
+            _write_response_to_file(response, file_path)
 
         except Exception as e:
             print(f"文件下载失败, url： {url} \nReason：{e}")

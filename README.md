@@ -187,6 +187,9 @@ file_path = download_file('https://example.com/file.jpg', './downloads', 'myfile
 
 # 返回完整信息
 file_path, file_name = download_file('https://example.com/file.jpg', './downloads', return_type="both")
+
+# 禁用流式下载（适用于小文件）
+file_path = download_file('https://example.com/file.jpg', './downloads', stream=False)
 ```
 
 #### 批量下载
