@@ -8,13 +8,13 @@ from .convert import to_jpg
 from .draw import draw_mask, add_text
 
 # 图片裁剪相关
-from .img_crop import crop_transparent
+from .img_crop import crop_transparent, crop_image, multi_crop_image
 
 # 图片填充/合成相关
-from .img_fill import paste_image, paste_logo
+from .img_fill import paste_image, paste_logo, color_fill
 
 # 图片信息获取
-from .img_info import is_dark_color
+from .img_info import is_dark_color, correct_position
 
 # 图片缩放相关
 from .img_scale import scale_image
@@ -30,13 +30,17 @@ __all__ = [
     
     # 图片裁剪相关
     'crop_transparent',
-    
+    'crop_image',
+    'multi_crop_image',
+
     # 图片填充/合成相关
     'paste_image',
     'paste_logo',
-    
+    'color_fill',
+
     # 图片信息获取
     'is_dark_color',
+    'correct_position',
     
     # 图片缩放相关
     'scale_image'

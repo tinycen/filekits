@@ -4,6 +4,7 @@ import random
 from typing import Literal
 from PIL import Image
 from ..base_io import load_image
+from .img_info import correct_position
 
 def paste_image( original_image , paste_img , box , backend: Literal["PIL"] = "PIL" ) -> Image.Image:
     original_image = load_image( original_image , backend )
@@ -71,4 +72,41 @@ def paste_logo( image_path , logo_path , output_path, choice=[ 'top_left' , 'top
     logo.close()
 
     return output_path
+
+
+# 颜色填充
+def color_fill( image_path, modify_info, output_path ) :
+    modify_info = correct_position( modify_info )
+    fill_action = modify_info[ 'type' ]
+    if "white" in fill_action :
+        color = "white"
+    elif "black" in fill_action :
+        color = "black"
+    else :
+        color = "white"
+
+    # 加载图片
+    img = Image.open( image_path )
+
+    # 获取要修改的区域的坐标
+    start_x = modify_info[ 'startX' ]
+    start_y = modify_info[ 'startY' ]
+    end_x = modify_info[ 'endX' ]
+    end_y = modify_info[ 'endY' ]
+
+    rectangle_width = round( end_x - start_x )
+    rectangle_height = round( end_y - start_y )
+
+    # 创建遮罩区域
+    white_rectangle = Image.new( 'RGB', (rectangle_width, rectangle_height), color )
+    # 将白色矩形粘贴到原图的指定位置
+    img = paste_image( img, white_rectangle, (start_x, start_y, end_x, end_y), "PIL" )
+
+    # 检测img是否为RGB格式，确保图像模式为 'RGB'
+    if img.mode != 'RGB' :
+        img = img.convert( 'RGB' )
+    img.save( output_path )
+    img.close()
+
+    return
 
