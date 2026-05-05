@@ -6,14 +6,14 @@ from PIL import Image
 from ..base_io import load_image
 from .img_info import correct_position
 
-def paste_image( original_image , paste_img , box , backend: Literal["PIL"] = "PIL" ) -> Image.Image:
+def paste_image( original_image , paste_img , box: tuple[int, int] | tuple[int, int, int, int] , backend: Literal["PIL"] = "PIL" ) -> Image.Image:
     original_image = load_image( original_image , backend )
     paste_img = load_image( paste_img , backend )
 
     if backend == "PIL" :
         rounded_box = tuple( round( element ) if isinstance( element , float ) else element for element in box )
         # isinstance(element, float) 是用来判断元素是否为浮点数类型，如果是则执行四舍五入操作，否则保持原样。
-        original_image.paste( paste_img , rounded_box )
+        original_image.paste( paste_img , rounded_box )  # pyright: ignore[reportArgumentType]
 
     # todo 下面这段代码存在问题，无法使用：ValueError: could not broadcast input array from shape (800,800,3) into shape (371,800,3)
     # elif backend == "cv2" and len( box ) == 4 :
@@ -77,6 +77,8 @@ def paste_logo( image_path , logo_path , output_path, choice=[ 'top_left' , 'top
 # 颜色填充
 def color_fill( image_path, modify_info, output_path ) :
     modify_info = correct_position( modify_info )
+    if modify_info is None:
+        return
     fill_action = modify_info[ 'type' ]
     if "white" in fill_action :
         color = "white"

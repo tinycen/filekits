@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image , ImageDraw
 from .img_info import correct_position
 
 
@@ -8,7 +8,10 @@ from .img_info import correct_position
 def crop_transparent( image_path , turn_jpg: bool = False ) :
     # 读取图片，包括 alpha 通道
     img = cv2.imread( image_path , cv2.IMREAD_UNCHANGED )
-    # 找到图片中的非透明部分
+    if img is None :
+        raise FileNotFoundError( f"无法读取图片: {image_path}" )
+    if img.ndim < 3 or img.shape[ 2 ] < 4 :
+        return image_path
     coords = np.argwhere( img[ ... , 3 ] )
     # 计算非透明部分的边界
     x0 , y0 = coords.min( axis = 0 )
@@ -36,8 +39,9 @@ def crop_image( image_path, modify_info, output_path, save_image = True, return_
     # 加载图片
     original_image = Image.open( image_path )
     crop_area = correct_position( modify_info )
+    if crop_area is None :
+        raise ValueError( "裁剪区域无效：起始位置与结束位置相同" )
     original_image = original_image.convert( 'RGB' )
-    # 定义裁剪区域
     start_x = crop_area[ 'startX' ]
     start_y = crop_area[ 'startY' ]
     end_x = crop_area[ 'endX' ]
@@ -88,6 +92,8 @@ def multi_crop_image( image_path, output_path, multi_regionCrop = None ) :
     # 遍历每一个需要裁剪的区域
     for modify_info in multi_regionCrop :
         crop_area = correct_position( modify_info )
+        if crop_area is None :
+            continue
         start_x = crop_area[ 'startX' ]
         start_y = crop_area[ 'startY' ]
         end_x = crop_area[ 'endX' ]
