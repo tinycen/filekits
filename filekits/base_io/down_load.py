@@ -92,12 +92,12 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
         file_name = url.split("/")[-1]
     else:
         # 如果提供了自定义文件名但没有扩展名，从URL获取扩展名
-        if "." not in file_name:
+        if "." not in file_name:  # pyright: ignore[reportOperatorIssue]
             file_extension = url.split(".")[-1] if "." in url.split("/")[-1] else ""
             if file_extension:
                 file_name = f"{file_name}.{file_extension}"
 
-    file_path = os.path.join(download_dir, file_name)
+    file_path = os.path.join(download_dir, file_name)  # pyright: ignore[reportCallIssue,reportArgumentType]
 
     # 检查文件是否已经存在
     if os.path.exists(file_path):
