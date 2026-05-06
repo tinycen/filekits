@@ -1,8 +1,9 @@
 import os
 from PIL import Image
+from ..base_io import StrPath
 
 # 转换图片为jpg
-def to_jpg( image_path , output_folder = "" , image_name = "" , delete_origin = True ) :
+def to_jpg( image_path: StrPath , output_folder: StrPath = "" , image_name: StrPath = "" , delete_origin = True ) :
     """
     将各种格式的图片转换为 JPG 格式（增强版，支持 GIF、PNG、WebP 等）
 

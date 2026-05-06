@@ -3,7 +3,7 @@
 import random
 from typing import Literal
 from PIL import Image
-from ..base_io import load_image
+from ..base_io import load_image, StrPath
 from .img_info import correct_position
 
 def paste_image( original_image , paste_img , box: tuple[int, int] | tuple[int, int, int, int] , backend: Literal["PIL"] = "PIL" ) -> Image.Image:
@@ -33,13 +33,18 @@ def paste_image( original_image , paste_img , box: tuple[int, int] | tuple[int, 
 
 
 # 在图像的四角随机一处添加水印
-def paste_logo( image_path , logo_path , output_path, choice=[ 'top_left' , 'top_right' ] ) :
+def paste_logo(
+    image_path: StrPath,
+    logo_path: StrPath,
+    output_path: StrPath,
+    choice: list[str] = ['top_left', 'top_right']
+) -> StrPath:
     """
     Args:
-        image_path (str): 原始图像路径
-        logo_path (str): 水印图像路径
-        output_path (str): 输出图像路径
-        choice (list, optional): 选择添加水印的位置，默认为 ['top_left', 'top_right'],
+        image_path: 原始图像路径
+        logo_path: 水印图像路径
+        output_path: 输出图像路径
+        choice: 选择添加水印的位置，默认为 ['top_left', 'top_right'],
             可选:['top_left', 'top_right', 'bottom_left', 'bottom_right']
     """
     image = Image.open( image_path )

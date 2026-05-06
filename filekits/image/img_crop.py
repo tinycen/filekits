@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 from PIL import Image , ImageDraw
+from ..base_io import StrPath
 from .img_info import correct_position
 
 
 # 删除png图片的透明区域
-def crop_transparent( image_path , turn_jpg: bool = False ) :
+def crop_transparent( image_path: StrPath , turn_jpg: bool = False ) :
     # 读取图片，包括 alpha 通道
     img = cv2.imread( image_path , cv2.IMREAD_UNCHANGED )
     if img is None :
@@ -35,7 +36,7 @@ def crop_transparent( image_path , turn_jpg: bool = False ) :
 
 
 # 裁剪图像
-def crop_image( image_path, modify_info, output_path, save_image = True, return_type = "remaining_image" ) :
+def crop_image( image_path: StrPath, modify_info, output_path: StrPath, save_image = True, return_type = "remaining_image" ) :
     # 加载图片
     original_image = Image.open( image_path )
     crop_area = correct_position( modify_info )
@@ -78,7 +79,7 @@ def crop_image( image_path, modify_info, output_path, save_image = True, return_
 
 
 # 同时裁剪多个区域，保留剩下的区域
-def multi_crop_image( image_path, output_path, multi_regionCrop = None ) :
+def multi_crop_image( image_path: StrPath, output_path: StrPath, multi_regionCrop = None ) :
     # 加载图片
     if multi_regionCrop is None :
         multi_regionCrop = [ ]

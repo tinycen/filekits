@@ -1,10 +1,11 @@
 import os
 from PIL import Image , ImageDraw , ImageFont , ImageStat
+from ..base_io import StrPath
 from .img_info import is_dark_color
 
 
 # 画出mask图像
-def draw_mask( image_path , modify_info , output_folder , output_path , expansion_area = 200 ) :
+def draw_mask( image_path: StrPath , modify_info , output_folder: StrPath , output_path: StrPath , expansion_area = 200 ) :
     startX = modify_info[ 'startX' ]
     startY = modify_info[ 'startY' ]
     endX = modify_info[ 'endX' ]
@@ -66,7 +67,7 @@ def draw_mask( image_path , modify_info , output_folder , output_path , expansio
     return cropped_img_path , new_area
 
 
-def add_text( img_path , box_infos , font_path , output_path = 'add_text.jpg' ) :
+def add_text( img_path: StrPath , box_infos , font_path: StrPath , output_path: StrPath = 'add_text.jpg' ) :
     """
     将文字添加到图片的指定区域，自动选择横向或纵向排列。
     """

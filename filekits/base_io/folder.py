@@ -1,8 +1,9 @@
 import os
 import shutil
+from . import StrPath
 
 # 遍历文件夹地址，返回指定类型或包含指定名称的文件列表
-def find_files( folder_path , extension , filename_match = "" ) :
+def find_files( folder_path: StrPath , extension: StrPath , filename_match: StrPath = "" ) :
     file_list = [ ]
     # 遍历目录
     for root , dirs , files in os.walk( folder_path ) :
@@ -18,7 +19,7 @@ def find_files( folder_path , extension , filename_match = "" ) :
 
 
 # 清空指定文件夹
-def clear_folder( folder_path ) :
+def clear_folder( folder_path: StrPath ) :
     # 检测文件夹是否存在，如果不存在就创建
     if not os.path.exists( folder_path ) :
         os.makedirs( folder_path )
@@ -53,7 +54,7 @@ def find_parent_folder( target_folder_name ) :
 
 
 # 递归打印目录树结构，可选择导出为文件
-def print_folder_tree(folder_path, indent='', output_file=None):
+def print_folder_tree(folder_path: StrPath, indent='', output_file: StrPath | None = None):
     """
     递归打印文件夹树结构
     

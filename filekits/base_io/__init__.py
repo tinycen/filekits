@@ -2,6 +2,13 @@
 # 提供文件读写、下载、文件夹操作等功能
 # 该模块封装了常用的文件操作功能，包括文件保存、加载、下载和文件夹管理
 
+from os import PathLike
+from typing import Union
+
+# 通用路径类型定义，支持 str、bytes 和 PathLike
+# 用于替代 str 类型注解，避免 os.path.join() 返回类型导致的编辑器误报
+StrPath = Union[str, bytes, PathLike]
+
 # 文件保存相关
 from .save import save_df, save_json, save_txt , batch_save_df
 
@@ -28,9 +35,12 @@ from .folder import (
 
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
+    # 类型定义
+    'StrPath',
+    
     # 文件保存
     'save_df',
-    'save_json', 
+    'save_json',
     'save_txt',
     'batch_save_df',
     

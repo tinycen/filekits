@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+from . import StrPath
 
 
 # 检查即将保存的数据
@@ -15,7 +16,7 @@ def pre_check_df( data ) :
         raise TypeError( "输入数据必须是列表List或DataFrame类型" )
 
 
-def save_df( data , output_path , charset = 'utf-8', sepset = None, header = True ) :
+def save_df( data , output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) :
     """
     将DataFrame或列表保存为指定格式的文件
     
@@ -51,7 +52,7 @@ def save_df( data , output_path , charset = 'utf-8', sepset = None, header = Tru
     return
 
 
-def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = None, header = True ) :
+def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) :
     """
     将DataFrame或列表，按照批次大小，保存为指定格式的文件
     
@@ -97,7 +98,7 @@ def batch_save_df( data , batch_size, output_path , charset = 'utf-8', sepset = 
 
 
 # 字典保存为json文件
-def save_json( data_dict, output_file = 'output.json', indent = 4 ) :
+def save_json( data_dict, output_file: StrPath = 'output.json', indent = 4 ) :
     # 将字典转换为JSON格式字符串
     json_str = json.dumps( data_dict, ensure_ascii = False, indent = indent )
     # 打开文件，以写入模式打开
@@ -108,7 +109,7 @@ def save_json( data_dict, output_file = 'output.json', indent = 4 ) :
 
 
 # 保存为txt文件（支持列表和文本字符串）
-def save_txt( data , output_file = 'output.txt' , overwrite = True ) :
+def save_txt( data , output_file: StrPath = 'output.txt' , overwrite = True ) :
     # 根据overwrite参数选择写入模式：'w'覆盖写入，'a'追加写入
     mode = 'w' if overwrite else 'a'
     with open( output_file , mode , encoding = 'utf-8' ) as f :

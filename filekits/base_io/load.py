@@ -22,10 +22,11 @@ except ImportError as e:
     raise
 from PIL import Image
 from typing import Union, overload, Literal
+from . import StrPath
 
 
 # 读取txt文档，返回列表
-def load_txt(file_path, lower_list=0, return_type="list"):
+def load_txt(file_path: StrPath, lower_list=0, return_type="list"):
     f = open(file_path, "r", encoding='utf-8')
     text = f.read().strip()
     f.close()
@@ -41,14 +42,14 @@ def load_txt(file_path, lower_list=0, return_type="list"):
 
 
 # 读取yaml文件
-def load_yaml(file_path):
+def load_yaml(file_path: StrPath):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
     return data
 
 
 # 读取Excel文件，返回pandas.DataFrame 或者 sheet
-def load_excel(file_path, return_type, sheet_name=None, skiprows=0, header=0):
+def load_excel(file_path: StrPath, return_type, sheet_name=None, skiprows=0, header=0):
     '''
     for i in range (2 , num+1) :  # 第1行是 标题，所以从第2行开始
         sku = sheet.cell (i , 2).value
@@ -73,14 +74,14 @@ def load_excel(file_path, return_type, sheet_name=None, skiprows=0, header=0):
 
 
 # 读取json文件，返回字典
-def load_json(file_path):
+def load_json(file_path: StrPath):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data
 
 
 # 读取任意文件转为 base64 编码
-def load_base64(file_path):
+def load_base64(file_path: StrPath):
     with open(file_path, "rb") as file:
         file_data = file.read()
     base64_data = base64.b64encode(file_data).decode('utf-8')
@@ -91,12 +92,12 @@ def load_base64(file_path):
 # 使用 @overload 装饰器进行类型重载，以便静态类型检查器（如 Pyright）
 # 能够根据 backend 参数的值精确推断返回类型，避免类型检查错误
 @overload
-def load_image( image_path , backend: Literal["PIL"] = "PIL" ) -> Image.Image : ...
+def load_image( image_path: StrPath , backend: Literal["PIL"] = "PIL" ) -> Image.Image : ...
 
 @overload
-def load_image( image_path , backend: Literal["cv2"] ) -> np.ndarray : ...
+def load_image( image_path: StrPath , backend: Literal["cv2"] ) -> np.ndarray : ...
 
-def load_image( image_path , backend="PIL" ) -> Union[Image.Image, np.ndarray] :
+def load_image( image_path: StrPath , backend="PIL" ) -> Union[Image.Image, np.ndarray] :
     """
     读取图像文件或处理图像对象
     

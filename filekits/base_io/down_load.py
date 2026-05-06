@@ -2,6 +2,7 @@ import os
 import base64
 import requests
 from funcguard.tools import send_request
+from . import StrPath
 
 DEFAULT_HEADERS = {
     "Accept": "application/json, text/plain, */*",
@@ -43,7 +44,7 @@ def _send_request_with_retry(url, headers=None, stream=False):
     return response
 
 
-def _write_response_to_file(response, file_path: str, chunk_size: int = 1024):
+def _write_response_to_file(response, file_path: StrPath, chunk_size: int = 1024):
     """
     将响应内容写入文件，支持流式分块写入
 
@@ -64,7 +65,7 @@ def _write_response_to_file(response, file_path: str, chunk_size: int = 1024):
 
 
 # 下载网络文件
-def download_file(url, download_dir, file_name="", return_type="name", stream=True):
+def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_type="name", stream=True):
     """
     使用 send_request 自动重试功能下载网络文件
 
@@ -124,7 +125,7 @@ def download_file(url, download_dir, file_name="", return_type="name", stream=Tr
 
 # 批量下载文件(单线程)，默认下载图片
 def download_files(
-    files, output_folder,
+    files, output_folder: StrPath,
     return_type="list", extensions=None, on_fail_action="skip"
 ):
     """
