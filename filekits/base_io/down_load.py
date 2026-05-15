@@ -24,18 +24,19 @@ def _send_request_with_retry(url, headers=None, stream=False):
     """
 
     # 为阿里cdn添加特殊处理
-    # if "https://cbu01.alicdn.com" in url:
-    #     response = send_request(method='GET', url=url, headers=headers, return_type=return_type)
+    if "https://cbu01.alicdn.com" in url and not headers:
+        headers = DEFAULT_HEADERS
 
     response = send_request(
         method="GET", url=url, headers=headers, return_type="response",
         curl_fallback=True, stream=stream
     )
 
-    # 检查响应状态码，403 表示访问被拒绝，通常是下载失败
-    if response.status_code == 403:
+    # 检查响应状态码，403/420 表示访问被拒绝，通常是下载失败或缺少 headers
+    if response.status_code in (403, 420):
+        hint = "，可能是请求缺少必要的 headers（如 User-Agent）" if headers is None else ""
         raise requests.HTTPError(
-            f"下载失败，服务器返回 403 Forbidden，URL: {url}"
+            f"下载失败，服务器返回 {response.status_code}{hint}，URL: {url}"
         )
 
     # 检查其他 HTTP 错误状态码
