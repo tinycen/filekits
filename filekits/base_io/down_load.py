@@ -66,7 +66,7 @@ def _write_response_to_file(response, file_path: StrPath, chunk_size: int = 1024
 
 
 # 下载网络文件
-def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_type="name", stream=True):
+def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_type="name", stream=True, headers=None):
     """
     使用 send_request 自动重试功能下载网络文件
 
@@ -79,6 +79,7 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
             - "path": 仅返回完整路径
             - "both": 返回(路径, 文件名)元组
         stream: 是否使用流式下载（默认True，适用于大文件）
+        headers: 自定义请求头（可选）
 
     Returns:
         根据return_type参数返回：
@@ -105,7 +106,7 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
         print(f"文件 {file_name} 已经存在，跳过下载")
     else:
         try:
-            response = _send_request_with_retry(url, stream=stream)
+            response = _send_request_with_retry(url, headers=headers, stream=stream)
 
             # 使用辅助函数写入文件
             _write_response_to_file(response, file_path)
@@ -127,7 +128,7 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
 # 批量下载文件(单线程)，默认下载图片
 def download_files(
     files, output_folder: StrPath,
-    return_type="list", extensions=None, on_fail_action="skip"
+    return_type="list", extensions=None, on_fail_action="skip", headers=None
 ):
     """
     批量下载文件
@@ -140,6 +141,7 @@ def download_files(
         on_fail_action: 失败次数过多时的行为，可选值：
             - "skip": 跳过并结束整个循环（默认）
             - "raise": 抛出异常，报出错误
+        headers: 自定义请求头（可选）
 
     Returns:
         根据return_type参数返回文件路径列表或字典列表
@@ -173,7 +175,7 @@ def download_files(
             i += 1
 
         try:
-            file_path = download_file(url, output_folder, file_name, return_type="path")
+            file_path = download_file(url, output_folder, file_name, return_type="path", headers=headers)
         except Exception as e:
             print(f"文件下载失败，已跳过：{url}")
             download_fail_count += 1
@@ -205,11 +207,15 @@ def download_files(
 
 
 # 下载网络文件并转为base64编码
-def download_encode_base64(url):
+def download_encode_base64(url, headers=None):
     """
     下载网络文件并直接返回base64编码
+
+    Args:
+        url: 文件URL
+        headers: 自定义请求头（可选）
     """
-    response = _send_request_with_retry(url)
+    response = _send_request_with_retry(url, headers=headers)
 
     # 读取文件内容并转为base64
     file_data = response.content
@@ -219,13 +225,14 @@ def download_encode_base64(url):
 
 
 # 批量 下载网络文件并转为base64编码
-def batch_download_encode_base64(urls: list, skip_error=True):
+def batch_download_encode_base64(urls: list, skip_error=True, headers=None):
     """
     批量下载网络文件并转为base64编码
 
     Args:
         urls: 文件URL列表
         skip_error: 是否跳过错误文件，默认True
+        headers: 自定义请求头（可选）
 
     Returns:
         list: 包含每个文件base64编码的列表
@@ -236,7 +243,7 @@ def batch_download_encode_base64(urls: list, skip_error=True):
     base64_list = []
     for url in urls:
         try:
-            base64_data = download_encode_base64(url)
+            base64_data = download_encode_base64(url, headers=headers)
             base64_list.append(base64_data)
         except Exception as e:
             if skip_error:

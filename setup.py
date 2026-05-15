@@ -18,7 +18,7 @@ except FileNotFoundError:
 
 setup(  
     name='filekits',
-    version='0.2.15',
+    version='0.2.16',
     packages=find_packages(),
     install_requires=install_requires,
     author='tinycen',
