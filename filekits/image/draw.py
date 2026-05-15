@@ -4,8 +4,28 @@ from ..base_io import StrPath
 from .img_info import is_dark_color
 
 
-# 画出mask图像
-def draw_mask( image_path: StrPath , modify_info , output_folder: StrPath , output_path: StrPath , expansion_area = 200 ) :
+def draw_mask(
+    image_path: StrPath ,
+    modify_info: dict ,
+    output_folder: StrPath ,
+    output_path: StrPath ,
+    expansion_area: int = 200
+) -> tuple[ str , dict ] :
+    """
+    绘制矩形mask图像：将指定区域填充为白色，其余区域填充为黑色。
+
+    当 expansion_area > 0 时，会裁剪出扩展后的区域并创建局部mask，
+    同时保存裁剪后的原图用于后续处理（intelli_fill），缩减输入图片尺寸，大幅节省显存。
+
+    :param image_path: 输入图片路径
+    :param modify_info: 矩形区域信息，格式为 {'startX': int, 'startY': int, 'endX': int, 'endY': int}
+    :param output_folder: 裁剪图片的输出文件夹路径（当 expansion_area > 0 时使用）
+    :param output_path: mask图像的保存路径
+    :param expansion_area: 向外扩展的像素数，默认为200。为0时创建全图大小的mask
+    :return: (cropped_img_path, new_area)
+             - cropped_img_path: 裁剪后的原图路径（expansion_area为0时返回空字符串）
+             - new_area: 新的区域坐标信息（expansion_area为0时返回原始modify_info）
+    """
     startX = modify_info[ 'startX' ]
     startY = modify_info[ 'startY' ]
     endX = modify_info[ 'endX' ]
@@ -159,14 +179,26 @@ def add_text( img_path: StrPath | Image.Image , box_infos , font_path: dict , ou
     return output_path
 
 
-def draw_mask_by_box( img_path , boxes , output_path , expansion_box = 20 ) :
+def draw_mask_by_box(
+    img_path: StrPath ,
+    boxes: list[ list[ tuple[ float , float ] ] ] ,
+    output_path: StrPath ,
+    expansion_box: int = 20
+) -> StrPath | Image.Image :
     """
-    绘制mask：将整张图片填充为黑色，指定形状区域填充为白色。
+    绘制多边形mask图像：将整张图片填充为黑色，指定多边形区域填充为白色。
+
+    支持多个多边形区域，每个多边形通过沿中心方向向外扩展指定像素。
+    与 draw_mask 不同，此函数不裁剪图片，始终创建全图大小的mask。
 
     :param img_path: 输入图片路径
-    :param boxes: 指定形状的点列表，格式为 [[(x1, y1), (x2, y2), ..., (xn, yn)], ...]
-    :param output_path: 输出图片路径
-    :param expansion_box: 要扩展的像素数，默认为20
+    :param boxes: 多边形点列表，格式为 [[(x1, y1), (x2, y2), ..., (xn, yn)], ...]
+                  每个子列表代表一个多边形，点按顺序连接形成闭合区域
+    :param output_path: 输出图片路径。如果为空字符串，则返回Image对象而不保存
+    :param expansion_box: 多边形向外扩展的像素数，默认为20。
+                          扩展方向为沿点到中心的方向向量
+    :return: 如果 output_path 不为空，返回保存的文件路径；
+             如果 output_path 为空字符串，返回 Image.Image 对象
     """
     # 打开图像
     image = Image.open( img_path )
