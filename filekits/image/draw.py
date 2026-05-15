@@ -46,7 +46,7 @@ def draw_mask( image_path: StrPath , modify_info , output_folder: StrPath , outp
         endY = endY - new_startY
 
         # 保存裁剪后的图片
-        cropped_img_path = os.path.join( output_folder , "cropped_image.jpg" )
+        cropped_img_path = os.path.join( str( output_folder ) , "cropped_image.jpg" )
         cropped_img.save( cropped_img_path )
 
     # 创建一个可以在图片上绘制的对象
@@ -67,14 +67,14 @@ def draw_mask( image_path: StrPath , modify_info , output_folder: StrPath , outp
     return cropped_img_path , new_area
 
 
-def add_text( img_path: StrPath , box_infos , font_path: StrPath , output_path: StrPath = 'add_text.jpg' ) :
+def add_text( img_path: StrPath | Image.Image , box_infos , font_path: dict , output_path: StrPath = 'add_text.jpg' ) :
     """
     将文字添加到图片的指定区域，自动选择横向或纵向排列。
     """
-    if isinstance( img_path , str ) :
-        image = Image.open( img_path )
-    else :
+    if isinstance( img_path , Image.Image ) :
         image = img_path
+    else :
+        image = Image.open( img_path )
 
     draw = ImageDraw.Draw( image )
 
