@@ -5,7 +5,7 @@
 from .convert import to_jpg
 
 # 图片绘制相关
-from .draw import draw_mask, add_text
+from .draw import create_rect_mask, create_polygon_mask, add_text
 
 # 图片裁剪相关
 from .img_crop import crop_transparent, crop_image, multi_crop_image
@@ -25,7 +25,8 @@ __all__ = [
     'to_jpg',
     
     # 图片绘制相关
-    'draw_mask',
+    'create_rect_mask',
+    'create_polygon_mask',
     'add_text',
     
     # 图片裁剪相关

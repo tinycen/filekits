@@ -1,256 +1,245 @@
 import os
-from PIL import Image , ImageDraw , ImageFont , ImageStat
+from typing import TypedDict
+
+from PIL import Image, ImageDraw, ImageFont, ImageStat
+
 from ..base_io import StrPath
 from .img_info import is_dark_color
 
 
-def draw_mask(
-    image_path: StrPath ,
-    modify_info: dict ,
-    output_folder: StrPath ,
-    output_path: StrPath ,
-    expansion_area: int = 200
-) -> tuple[ str , dict ] :
+# ---------------------------------------------------------------------------
+# 类型别名
+# ---------------------------------------------------------------------------
+
+class RectRegion(TypedDict):
+    startX: int
+    startY: int
+    endX:   int
+    endY:   int
+
+
+# ---------------------------------------------------------------------------
+# 私有辅助函数
+# ---------------------------------------------------------------------------
+
+
+def _expand_polygon(
+    vertices: list[tuple[float, float]],
+    expand_px: int,
+    canvas_size: tuple[int, int],
+) -> list[tuple[float, float]]:
     """
-    绘制矩形mask图像：将指定区域填充为白色，其余区域填充为黑色。
+    将多边形的每个顶点沿「顶点→质心」反方向（即向外）移动 *expand_px* 像素。
 
-    当 expansion_area > 0 时，会裁剪出扩展后的区域并创建局部mask，
-    同时保存裁剪后的原图用于后续处理（intelli_fill），缩减输入图片尺寸，大幅节省显存。
-
-    :param image_path: 输入图片路径
-    :param modify_info: 矩形区域信息，格式为 {'startX': int, 'startY': int, 'endX': int, 'endY': int}
-    :param output_folder: 裁剪图片的输出文件夹路径（当 expansion_area > 0 时使用）
-    :param output_path: mask图像的保存路径
-    :param expansion_area: 向外扩展的像素数，默认为200。为0时创建全图大小的mask
-    :return: (cropped_img_path, new_area)
-             - cropped_img_path: 裁剪后的原图路径（expansion_area为0时返回空字符串）
-             - new_area: 新的区域坐标信息（expansion_area为0时返回原始modify_info）
+    结果坐标会被裁剪到 *canvas_size* = (width, height) 范围内。
     """
-    startX = modify_info[ 'startX' ]
-    startY = modify_info[ 'startY' ]
-    endX = modify_info[ 'endX' ]
-    endY = modify_info[ 'endY' ]
+    width, height = canvas_size
+    cx = sum(p[0] for p in vertices) / len(vertices)
+    cy = sum(p[1] for p in vertices) / len(vertices)
 
-    # 这里不能使用with
-    img = Image.open( image_path )
-    width , height = img.size
+    expanded: list[tuple[float, float]] = []
+    for x, y in vertices:
+        dx, dy = x - cx, y - cy
+        dist = (dx ** 2 + dy ** 2) ** 0.5
+        if dist < 1e-6:
+            ex, ey = x, y
+        else:
+            ex = x + (dx / dist) * expand_px
+            ey = y + (dy / dist) * expand_px
+        ex = max(0.0, min(width  - 1, ex))
+        ey = max(0.0, min(height - 1, ey))
+        expanded.append((ex, ey))
 
-    if expansion_area == 0 :
-        # 创建一个全黑的图片，与原始图片大小相同
-        black_image = Image.new( 'RGB' , (width , height) , color = (0 , 0 , 0) )
+    return expanded
+
+
+# ---------------------------------------------------------------------------
+# 公开函数
+# ---------------------------------------------------------------------------
+
+def create_rect_mask(
+    img_path: StrPath,
+    rect: RectRegion,
+    mask_path: StrPath,
+    crop_dir: StrPath,
+    crop_expansion: int = 200,
+) -> tuple[str, RectRegion]:
+    """
+    生成矩形 mask：*rect* 内部填白色，其余填黑色。
+
+    当 *crop_expansion* > 0 时，会以 *rect* 为中心向外各扩展 *crop_expansion*
+    像素裁剪出一个小图块（保存到 *crop_dir*/cropped_image.jpg），mask 也只覆盖
+    该图块，从而减少后续 inpainting 的显存占用。
+
+    Parameters
+    ----------
+    img_path       : 原始图片路径
+    rect           : 目标矩形区域 {"startX", "startY", "endX", "endY"}
+    mask_path      : mask 图像的保存路径
+    crop_dir       : 裁剪小图块的输出目录（crop_expansion > 0 时使用）
+    crop_expansion : 裁剪时在 rect 四周额外保留的像素数；
+                     为 0 时生成与原图等大的 mask，不裁剪
+
+    Returns
+    -------
+    (cropped_img_path, crop_rect)
+    - cropped_img_path : 裁剪小图块的路径；crop_expansion == 0 时返回 ""
+    - crop_rect        : 图块在原图中的坐标；crop_expansion == 0 时返回原始 rect
+    """
+    # 归一化：确保左上角 < 右下角
+    x0 = min(rect['startX'], rect['endX'])
+    y0 = min(rect['startY'], rect['endY'])
+    x1 = max(rect['startX'], rect['endX'])
+    y1 = max(rect['startY'], rect['endY'])
+
+    img = Image.open(img_path)
+    img_w, img_h = img.size
+
+    if crop_expansion == 0:
+        # 生成与原图等大的 纯黑色 mask
+        canvas = Image.new('RGB', (img_w, img_h), color=(0, 0, 0))
         cropped_img_path = ""
-        new_area = modify_info
-    else :
-        # 扩展mask指定像素的区域
-        new_startX = max( 0 , startX - expansion_area )
-        new_startY = max( 0 , startY - expansion_area )
-        new_endX = min( width , endX + expansion_area )
-        new_endY = min( height , endY + expansion_area )
+        crop_rect: RectRegion = rect
+        draw_x0, draw_y0, draw_x1, draw_y1 = x0, y0, x1, y1
+    else:
+        # 计算裁剪窗口（不超出图片边界）
+        crop_x0 = max(0,      x0 - crop_expansion)
+        crop_y0 = max(0,      y0 - crop_expansion)
+        crop_x1 = min(img_w,  x1 + crop_expansion)
+        crop_y1 = min(img_h,  y1 + crop_expansion)
 
-        new_area = {
-            'startX' : new_startX ,
-            'startY' : new_startY ,
-            'endX'   : new_endX ,
-            'endY'   : new_endY
+        crop_rect = {
+            'startX': crop_x0, 'startY': crop_y0,
+            'endX':   crop_x1, 'endY':   crop_y1,
         }
-        # 裁剪出这部分区域，注意 在PIL库中，.crop() 裁剪操作会保留原有图像的数据和模式
-        cropped_img = img.crop( (new_startX , new_startY , new_endX , new_endY) )
-        # 确保转换为 RGB 模式
-        cropped_img = cropped_img.convert( 'RGB' )
-        # 创建一个全黑的图片，与裁剪后的图片大小相同
-        black_image = Image.new( 'RGB' , cropped_img.size , color = (0 , 0 , 0) )
 
-        startX = startX - new_startX
-        startY = startY - new_startY
-        endX = endX - new_startX
-        endY = endY - new_startY
+        tile = img.crop((crop_x0, crop_y0, crop_x1, crop_y1)).convert('RGB')
+        # 生成与图块等大的 纯黑色 mask
+        canvas = Image.new('RGB', tile.size, color=(0, 0, 0))
 
-        # 保存裁剪后的图片
-        cropped_img_path = os.path.join( str( output_folder ) , "cropped_image.jpg" )
-        cropped_img.save( cropped_img_path )
+        # 将 rect 坐标转换到图块局部坐标系
+        draw_x0, draw_y0 = x0 - crop_x0, y0 - crop_y0
+        draw_x1, draw_y1 = x1 - crop_x0, y1 - crop_y0
 
-    # 创建一个可以在图片上绘制的对象
-    draw = ImageDraw.Draw( black_image )
+        cropped_img_path = os.path.join(str(crop_dir), 'cropped_image.jpg')
+        tile.save(cropped_img_path)
 
-    # 确保矩形有效：即右下角的坐标应该大于或等于左上角的坐标。
-    startX , endX = min( startX , endX ) , max( startX , endX )
-    startY , endY = min( startY , endY ) , max( startY , endY )
-
-    # 在指定区域绘制一个白色的矩形
-    draw.rectangle( [ (startX , startY) , (endX , endY) ] , fill = (255 , 255 , 255) )
-
-    black_image.save( output_path )
-
-    # 关闭原始图像文件
     img.close()
 
-    return cropped_img_path , new_area
+    ImageDraw.Draw(canvas).rectangle(
+        [(draw_x0, draw_y0), (draw_x1, draw_y1)],
+        fill=(255, 255, 255),
+    )
+    canvas.save(mask_path)
+
+    return cropped_img_path, crop_rect
 
 
-def add_text( img_path: StrPath | Image.Image , box_infos , font_path: dict , output_path: StrPath = 'add_text.jpg' ) :
+def create_polygon_mask(
+    img_path: StrPath,
+    polygons: list[list[tuple[float, float]]],
+    mask_path: StrPath,
+    expand_px: int = 20,
+) -> StrPath | Image.Image:
     """
-    将文字添加到图片的指定区域，自动选择横向或纵向排列。
+    生成多边形 mask：每个多边形内部填白色，其余填黑色。
+
+    始终生成与原图等大的 mask，不做裁剪。
+
+    Parameters
+    ----------
+    img_path  : 原始图片路径（仅用于获取画布尺寸）
+    polygons  : 多边形列表，每个多边形为 [(x1,y1), (x2,y2), ...] 顶点序列
+    mask_path : mask 图像的保存路径；传入 "" 时不保存，直接返回 Image 对象
+    expand_px : 多边形各顶点向外扩展的像素数
+
+    Returns
+    -------
+    mask_path 不为空时返回保存路径；为空时返回内存中的 Image.Image 对象。
     """
-    if isinstance( img_path , Image.Image ) :
-        image = img_path
-    else :
-        image = Image.open( img_path )
+    img = Image.open(img_path)
+    canvas_size = img.size
+    img.close()
 
-    draw = ImageDraw.Draw( image )
+    # 生成与原图等大的 纯黑色 mask
+    canvas = Image.new('RGB', canvas_size, color=(0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
 
-    for box_info in box_infos :
-        text = box_info[ "text_translated" ]
-        box = box_info[ "box" ]
+    for polygon in polygons:
+        expanded = _expand_polygon(polygon, expand_px, canvas_size)
+        draw.polygon(expanded, fill=(255, 255, 255))
 
-        # 计算边界框
-        left_x = min( [ point[ 0 ] for point in box ] )
-        right_x = max( [ point[ 0 ] for point in box ] )
-        top_y = min( [ point[ 1 ] for point in box ] )
-        bottom_y = max( [ point[ 1 ] for point in box ] )
+    if mask_path:
+        canvas.save(mask_path)
+        return mask_path
+    return canvas
 
-        box_width = box_info[ "width" ]
-        box_height = box_info[ "height" ]
-        wh_ratio = box_width / box_height
 
-        # 选择字体
-        short_side = box_info[ "short_side" ]
-        font_file = font_path[ "Bold" ] if short_side >= 30 else font_path[ "Medium" ]
+def add_text(
+    img: StrPath | Image.Image,
+    box_infos: list[dict],
+    font_path: dict,
+    output_path: StrPath = 'add_text.jpg',
+) -> StrPath:
+    """
+    将文字绘制到图片的指定区域，自动适配横排 / 竖排及字号。
 
-        # 获取背景颜色并决定文字颜色
-        box_crop = image.crop( (left_x , top_y , right_x , bottom_y) )
-        stat = ImageStat.Stat( box_crop )
-        avg_color = stat.mean[ :3 ]
-        font_color = (255 , 255 , 255) if is_dark_color( avg_color ) else (0 , 0 , 0)
+    Parameters
+    ----------
+    img         : 图片路径或已打开的 Image 对象
+    box_infos   : 文字区域列表，每项包含 "text_translated"、"box"、
+                  "width"、"height"、"short_side" 字段
+    font_path   : 字体文件路径字典，包含 "Bold" 和 "Medium" 两个键
+    output_path : 输出图片路径
+    """
+    image = img if isinstance(img, Image.Image) else Image.open(img)
+    draw = ImageDraw.Draw(image)
 
-        # 判断是横向还是纵向,准备文本
-        if wh_ratio < 0.5 :
-            # 纵向排列时将文本转为竖排
-            display_text = '\n'.join( text )
-        else :
-            display_text = text
+    for box_info in box_infos:
+        text      = box_info['text_translated']
+        box       = box_info['box']
+        box_w     = box_info['width']
+        box_h     = box_info['height']
+        wh_ratio  = box_w / box_h
 
-        # 寻找合适的字体大小
-        found_fit = False
+        left_x  = min(p[0] for p in box)
+        right_x = max(p[0] for p in box)
+        top_y   = min(p[1] for p in box)
+        bottom_y = max(p[1] for p in box)
 
-        # 二分查找适合的字体大小
-        min_size = 2
-        max_size = 50
-        current_font_size = 20
+        # 字体选择
+        short_side  = box_info['short_side']
+        font_file   = font_path['Bold'] if short_side >= 30 else font_path['Medium']
 
-        while min_size <= max_size :
-            mid_size = (min_size + max_size) // 2
-            font = ImageFont.truetype( font_file , mid_size )
+        # 根据背景亮度决定文字颜色
+        avg_color  = ImageStat.Stat(image.crop((left_x, top_y, right_x, bottom_y))).mean[:3]
+        font_color = (255, 255, 255) if is_dark_color(avg_color) else (0, 0, 0)
 
-            # 计算文本尺寸
-            left , top , right , bottom = draw.textbbox( (0 , 0) , display_text , font = font )
-            text_width = right - left
-            text_height = bottom - top
+        # 竖排时逐字换行
+        display_text = '\n'.join(text) if wh_ratio < 0.5 else text
 
-            # 检查是否适合
-            if text_width <= box_width and text_height <= box_height :
-                # 找到一个合适的大小，尝试更大的
-                found_fit = True
-                min_size = mid_size + 1
-                current_font_size = mid_size
-            else :
-                # 太大了，尝试更小的
-                max_size = mid_size - 1
+        # 二分查找最大适配字号
+        lo, hi, best_size = 2, 50, 0
+        while lo <= hi:
+            mid  = (lo + hi) // 2
+            font = ImageFont.truetype(font_file, mid)
+            l, t, r, b = draw.textbbox((0, 0), display_text, font=font)
+            if (r - l) <= box_w and (b - t) <= box_h:
+                best_size = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
 
-        # 如果找到合适的大小，绘制文本
-        if found_fit :
-            font = ImageFont.truetype( font_file , current_font_size )
+        if best_size == 0:
+            print(f"Warning: Text '{text}' is too small to fit in box ({box_w}x{box_h}).")
+            continue  # 任何字号都放不下，跳过
 
-            # 计算最终文本尺寸
-            left , top , right , bottom = draw.textbbox( (0 , 0) , display_text , font = font )
-            # text_width = right - left
-            text_height = bottom - top
+        font = ImageFont.truetype(font_file, best_size)
+        _, t, _, b = draw.textbbox((0, 0), display_text, font=font)
+        # 左对齐、垂直居中
+        x = int(left_x)
+        y = int((top_y + bottom_y) / 2 - (b - t) / 2)
+        draw.text((x, y), display_text, font=font, fill=font_color)
 
-            # 文字位置：靠左对齐、垂直居中
-            # center_x = (left_x + right_x) / 2
-            # x = int( center_x - text_width / 2 )
-            center_y = (top_y + bottom_y) / 2
-            x = int( left_x )
-            y = int( center_y - text_height / 2 )
-
-            # 绘制文本
-            draw.text( (x , y) , display_text , font = font , fill = font_color )
-
-    image.save( output_path )
+    image.save(output_path)
     return output_path
-
-
-def draw_mask_by_box(
-    img_path: StrPath ,
-    boxes: list[ list[ tuple[ float , float ] ] ] ,
-    output_path: StrPath ,
-    expansion_box: int = 20
-) -> StrPath | Image.Image :
-    """
-    绘制多边形mask图像：将整张图片填充为黑色，指定多边形区域填充为白色。
-
-    支持多个多边形区域，每个多边形通过沿中心方向向外扩展指定像素。
-    与 draw_mask 不同，此函数不裁剪图片，始终创建全图大小的mask。
-
-    :param img_path: 输入图片路径
-    :param boxes: 多边形点列表，格式为 [[(x1, y1), (x2, y2), ..., (xn, yn)], ...]
-                  每个子列表代表一个多边形，点按顺序连接形成闭合区域
-    :param output_path: 输出图片路径。如果为空字符串，则返回Image对象而不保存
-    :param expansion_box: 多边形向外扩展的像素数，默认为20。
-                          扩展方向为沿点到中心的方向向量
-    :return: 如果 output_path 不为空，返回保存的文件路径；
-             如果 output_path 为空字符串，返回 Image.Image 对象
-    """
-    # 打开图像
-    image = Image.open( img_path )
-    width , height = image.size
-
-    # 创建一个全黑的图片，与原始图片大小相同
-    mask_image = Image.new( 'RGB' , (width , height) , color = (0 , 0 , 0) )
-    draw = ImageDraw.Draw( mask_image )
-
-    # 绘制每个框
-    for i , box in enumerate( boxes ) :
-        # 找到多边形的中心点
-        x_coords = [ p[ 0 ] for p in box ]
-        y_coords = [ p[ 1 ] for p in box ]
-
-        # 计算各个方向的扩展量
-        # 向四周扩展指定的像素
-        expanded_points = [ ]
-        for point in box :
-            x , y = point
-            # 计算点到中心的向量
-            center_x = sum( x_coords ) / len( x_coords )
-            center_y = sum( y_coords ) / len( y_coords )
-
-            # 计算方向向量
-            dir_x = x - center_x
-            dir_y = y - center_y
-
-            # 如果点在中心，则不需要扩展方向
-            if abs( dir_x ) < 1e-6 and abs( dir_y ) < 1e-6 :
-                expanded_x , expanded_y = x , y
-            else :
-                # 计算单位向量
-                dist = (dir_x ** 2 + dir_y ** 2) ** 0.5
-                norm_x , norm_y = dir_x / dist , dir_y / dist
-
-                # 扩展点
-                expanded_x = x + norm_x * expansion_box
-                expanded_y = y + norm_y * expansion_box
-
-            # 确保不超出图片范围
-            expanded_x = max( 0 , min( width - 1 , expanded_x ) )
-            expanded_y = max( 0 , min( height - 1 , expanded_y ) )
-
-            expanded_points.append( (expanded_x , expanded_y) )
-
-        # 在指定区域绘制一个白色的形状
-        draw.polygon( expanded_points , fill = (255 , 255 , 255) )
-
-    # 保存图像到新的文件
-    if output_path != "" :
-        mask_image.save( output_path )
-        return output_path
-    else :
-        return mask_image

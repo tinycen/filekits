@@ -277,12 +277,22 @@ scale_image('reference.jpg', 'target.jpg')
 
 #### 图像绘制
 ```python
-from filekits.image import draw_mask, add_text
+from filekits.image import create_rect_mask, create_polygon_mask, add_text
 
-# 绘制遮罩图像（指定区域为白色，其余为黑色）
-cropped_path, area = draw_mask('image.jpg', 
-                              {'startX': 100, 'startY': 100, 'endX': 300, 'endY': 300},
-                              './output', 'mask.jpg')
+# 绘制矩形遮罩（指定区域为白色，其余为黑色）
+# 当 crop_expansion > 0 时会裁剪出小图块，减少显存占用
+cropped_path, area = create_rect_mask(
+    'image.jpg',
+    {'startX': 100, 'startY': 100, 'endX': 300, 'endY': 300},
+    'mask.jpg',
+    './output',
+    crop_expansion=200
+)
+
+# 绘制多边形遮罩（支持多个多边形区域）
+# 始终生成与原图等大的 mask，不做裁剪
+polygons = [[(100, 100), (300, 100), (300, 300), (100, 300)]]
+mask_path = create_polygon_mask('image.jpg', polygons, 'polygon_mask.jpg', expand_px=20)
 
 # 在图像上添加文字
 font_path = {'Bold': 'font_bold.ttf', 'Medium': 'font_medium.ttf'}
