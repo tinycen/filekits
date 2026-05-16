@@ -5,9 +5,9 @@
 from os import PathLike
 from typing import Union
 
-# 通用路径类型定义，支持 str、bytes 和 PathLike
+# 通用路径类型定义，支持 str 和 PathLike
 # 用于替代 str 类型注解，避免 os.path.join() 返回类型导致的编辑器误报
-StrPath = Union[str, bytes, PathLike]
+StrPath = Union[str, PathLike[str]]
 
 # 文件保存相关
 from .save import save_df, save_json, save_txt , batch_save_df
