@@ -143,7 +143,7 @@ def download_files(
         extensions: 允许的文件扩展名列表，None表示允许所有类型
         failure_policy: 批量下载失败次数过多时的处理策略，可选值：
             - "raise": 抛出异常（默认）
-            - "skip": 跳过剩余文件并结束
+            - "skip": 跳过当前失败文件，继续下载后续文件
         headers: 自定义请求头（可选）
 
     Returns:
@@ -192,8 +192,8 @@ def download_files(
                 if failure_policy == "raise":
                     raise RuntimeError(error_msg)
                 elif failure_policy == "skip":
-                    print(error_msg + "，已跳过剩余文件")
-                    break  # 终止整个循环
+                    print(error_msg + f"当前策略为：{failure_policy}，文件继续下载")
+                    continue  # 跳过当前文件，继续下载后续文件
                 else:
                     raise ValueError(
                         "failure_policy 参数错误，请传入 'skip' 或 'raise'"
