@@ -31,8 +31,7 @@ filekits/
 │   └── img_scale.py        # 图像缩放
 └── utils/                 
     ├── __init__.py         # 工具模块
-    ├── dict_util.py        # 字典处理工具
-    └── pd_util.py          # pandas数据处理工具
+    └── dict_util.py        # 字典处理工具
 ```
 
 ## 📦 安装/更新
@@ -59,17 +58,10 @@ text_str = load_txt('example.txt', return_type="str")
 lower_list = load_txt('example.txt', lower_list=1)
 ```
 
-#### 读取JSON文件
+#### 读取 JSON/YAML 文件
 ```python
-from filekits.base_io import load_json
-
+from filekits.base_io import load_json, load_yaml
 data = load_json('data.json')
-```
-
-#### 读取YAML文件
-```python
-from filekits.base_io import load_yaml
-
 config = load_yaml('config.yaml')
 ```
 
@@ -209,7 +201,17 @@ file_paths = download_files(urls, './downloads', extensions=['.jpg', '.png'])
 
 # 返回字典格式（包含URL信息）
 file_dicts = download_files(urls, './downloads', return_type="dict")
+
+# 自定义请求头
+file_paths = download_files(urls, './downloads', headers={"User-Agent": "Custom/1.0"})
+
+# 设置失败策略：跳过失败文件继续下载
+file_paths = download_files(urls, './downloads', failure_policy="skip")
 ```
+
+**failure_policy 参数说明：**
+- `"raise"`（默认）：当失败次数超过3次时，抛出 `RuntimeError` 异常
+- `"skip"`：当失败次数超过3次时，打印警告并继续下载后续文件
 
 #### 下载并转为Base64
 ```python
@@ -327,27 +329,6 @@ from filekits.image import is_dark_color
 # 判断颜色是否为深色（用于文字颜色选择）
 is_dark = is_dark_color([100, 100, 100])  # RGB值
 ```
-
-
-## ⚙️ 配置说明
-
-### 网络下载配置
-- 自动重试机制：使用`funcguard.tools.send_request`实现自动重试
-- User-Agent：内置浏览器User-Agent，避免被服务器拒绝
-- 特殊网站处理：针对阿里CDN等特定网站有优化处理
-
-### 文件格式支持
-- **文本文件**：.txt
-- **数据文件**：.json, .yaml, .yml
-- **表格文件**：.xlsx, .csv
-- **图片文件**：.jpg, .png, .gif, .bmp, .webp等（通过下载功能和图像处理模块）
-
-## 📝 注意事项
-
-1. **编码问题**：所有文本操作默认使用UTF-8编码
-2. **文件存在检查**：下载文件时会自动检查文件是否已存在，避免重复下载
-3. **错误处理**：批量下载时支持失败跳过或抛出异常两种模式
-4. **路径处理**：使用绝对路径或相对路径均可，程序会自动处理
 
 ## 📄 许可证
 
