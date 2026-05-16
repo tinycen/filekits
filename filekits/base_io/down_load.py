@@ -131,7 +131,7 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
 # 批量下载文件(单线程)，默认下载图片
 def download_files(
     files, output_folder: StrPath,
-    return_type="list", extensions=None, on_fail_action="skip", headers=None
+    return_type="list", extensions=None, failure_policy="raise", headers=None
 ):
     """
     批量下载文件
@@ -141,16 +141,16 @@ def download_files(
         output_folder: 下载目录
         return_type: 返回类型，"list"或"dict"
         extensions: 允许的文件扩展名列表，None表示允许所有类型
-        on_fail_action: 失败次数过多时的行为，可选值：
-            - "skip": 跳过并结束整个循环（默认）
-            - "raise": 抛出异常，报出错误
+        failure_policy: 批量下载失败次数过多时的处理策略，可选值：
+            - "raise": 抛出异常（默认）
+            - "skip": 跳过剩余文件并结束
         headers: 自定义请求头（可选）
 
     Returns:
         根据return_type参数返回文件路径列表或字典列表
 
     Raises:
-        RuntimeError: 当on_fail_action="raise"且下载失败次数过多时抛出
+        RuntimeError: 当failure_policy="raise"且下载失败次数过多时抛出
     """
     if extensions is None:
         extensions = []
@@ -158,7 +158,7 @@ def download_files(
     files_path = []
     i = 0  # 将i移到循环外部
     download_fail_count = 0  # 将失败计数器也移到外部，按整个批次计算
-    failed_urls = []  # 记录失败的URL
+    # failed_urls = []  # 记录失败的URL
 
     for url in files:
         # 提取文件扩展名（使用urlparse去除查询参数）
@@ -182,21 +182,21 @@ def download_files(
         try:
             file_path = download_file(url, output_folder, file_name, return_type="path", headers=headers)
         except Exception as e:
-            print(f"文件下载失败，已跳过：{url}")
+            print(f"已跳过")
             download_fail_count += 1
-            failed_urls.append(url)
+            # failed_urls.append(url)
 
             if download_fail_count > 3:
-                error_msg = f"文件下载失败次数过多，已失败 {download_fail_count} 个文件。失败的URL: {failed_urls}"
+                error_msg = f"文件下载失败次数过多，已达 {download_fail_count} 次。"
 
-                if on_fail_action == "raise":
+                if failure_policy == "raise":
                     raise RuntimeError(error_msg)
-                elif on_fail_action == "skip":
+                elif failure_policy == "skip":
                     print(error_msg + "，已跳过剩余文件")
                     break  # 终止整个循环
                 else:
                     raise ValueError(
-                        "on_fail_action 参数错误，请传入 'skip' 或 'raise'"
+                        "failure_policy 参数错误，请传入 'skip' 或 'raise'"
                     )
 
             continue
