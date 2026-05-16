@@ -1,6 +1,7 @@
 import os
 import base64
 import requests
+from urllib.parse import urlparse
 from funcguard.tools import send_request
 from . import StrPath
 
@@ -89,15 +90,17 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
         示例用法：
             file_path, file_name = download_file(url, download_dir, return_type="both")
     """
-    # 生成文件名
+    # 生成文件名，去除查询参数
+    parsed = urlparse(url)
+    path = parsed.path
     if file_name == "":
-        file_name = url.split("/")[-1]
+        file_name = os.path.basename(path)
     else:
         # 如果提供了自定义文件名但没有扩展名，从URL获取扩展名
         if "." not in file_name:  # pyright: ignore[reportOperatorIssue]
-            file_extension = url.split(".")[-1] if "." in url.split("/")[-1] else ""
+            file_extension = os.path.splitext(path)[1]
             if file_extension:
-                file_name = f"{file_name}.{file_extension}"
+                file_name = f"{file_name}{file_extension}"
 
     file_path = os.path.join(download_dir, file_name)  # pyright: ignore[reportCallIssue,reportArgumentType]
 
@@ -158,8 +161,10 @@ def download_files(
     failed_urls = []  # 记录失败的URL
 
     for url in files:
-        # 提取文件扩展名
-        ext = os.path.splitext(url)[1]
+        # 提取文件扩展名（使用urlparse去除查询参数）
+        parsed = urlparse(url)
+        path = parsed.path
+        ext = os.path.splitext(path)[1]
 
         # 判断是否允许该扩展名
         if extensions and ext.lower() not in extensions:
@@ -167,7 +172,7 @@ def download_files(
             continue
 
         # 替换文件类型后缀，避免后面重复拼接形成.jpg.jpg的情况
-        file_name = url.split("/")[-1].replace(ext, "")
+        file_name = os.path.basename(path).replace(ext, "")
 
         # 如果文件名太短，加前缀防止重命名冲突
         if len(file_name) < 7:
