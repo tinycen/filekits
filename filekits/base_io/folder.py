@@ -9,11 +9,11 @@ def find_files( folder_path: StrPath , extension: StrPath , filename_match: StrP
     for root , dirs , files in os.walk( folder_path ) :
         # 遍历文件，检查文件扩展名
         for filename in files :
-            if filename.endswith( extension ) :
+            if filename.endswith( str(extension) ) :
                 if filename_match == "" :
                     file_list.append( os.path.join( root , filename ) )
                 else :
-                    if filename_match in filename :
+                    if str(filename_match) in filename :
                         file_list.append( os.path.join( root , filename ) )
     return file_list
 
@@ -74,7 +74,7 @@ def print_folder_tree(folder_path: StrPath, indent='', output_file: StrPath | No
         return
     
     # 判断是否为Markdown格式（通过文件扩展名）
-    is_markdown = output_file is not None and output_file.lower().endswith('.md')
+    is_markdown = output_file is not None and str(output_file).lower().endswith('.md')
     
     # 如果是第一次调用，打印顶层目录名称
     if indent == '':
