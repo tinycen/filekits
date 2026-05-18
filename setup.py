@@ -16,9 +16,9 @@ try:
 except FileNotFoundError:
     install_requires = []
 
-setup(  
+setup(
     name='filekits',
-    version='0.2.18',
+    version='0.2.19',
     packages=find_packages(),
     install_requires=install_requires,
     author='tinycen',

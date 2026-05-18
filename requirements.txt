@@ -5,3 +5,5 @@ pyyaml
 funcguard
 opencv-python
 Pillow
+markdown
+markdown-it-py

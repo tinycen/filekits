@@ -27,23 +27,33 @@ from .down_load import (
 
 # 文件夹操作相关
 from .folder import (
-    find_files, 
-    clear_folder, 
-    find_parent_folder, 
-    print_folder_tree 
+    find_files,
+    clear_folder,
+    find_parent_folder,
+    print_folder_tree
+)
+
+# Markdown转换相关
+from .markdown_convert import (
+    file_to_markdown,
+    files_to_markdown,
+    dir_to_markdown,
+    markdown_to_html,
+    markdown_file_to_html,
+    batch_markdown_to_html,
 )
 
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
     # 类型定义
     'StrPath',
-    
+
     # 文件保存
     'save_df',
     'save_json',
     'save_txt',
     'batch_save_df',
-    
+
     # 文件加载
     'load_txt',
     'load_yaml',
@@ -51,16 +61,24 @@ __all__ = [
     'load_json',
     'load_base64',
     'load_image',
-    
+
     # 文件下载
     'download_file',
     'download_files',
     'download_encode_base64',
     'batch_download_encode_base64',
-    
+
     # 文件夹操作
     'find_files',
     'clear_folder',
     'find_parent_folder',
-    'print_folder_tree'
+    'print_folder_tree',
+
+    # Markdown转换
+    'file_to_markdown',
+    'files_to_markdown',
+    'dir_to_markdown',
+    'markdown_to_html',
+    'markdown_file_to_html',
+    'batch_markdown_to_html',
 ]
