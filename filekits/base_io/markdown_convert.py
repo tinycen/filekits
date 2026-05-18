@@ -1,4 +1,6 @@
 from pathlib import Path
+from markitdown import MarkItDown
+from markdown_it import MarkdownIt
 from typing import Any, Optional
 
 from . import StrPath
@@ -27,18 +29,8 @@ def file_to_markdown(
         str: 转换后的Markdown文本内容
 
     Raises:
-        ImportError: 未安装markitdown库时抛出
         FileNotFoundError: 文件不存在时抛出
     """
-    try:
-        from markitdown import MarkItDown
-    except ImportError:
-        raise ImportError(
-            "markitdown 未安装，请使用以下命令安装:\n"
-            "  pip install markitdown[all]\n"
-            "或仅安装基础版本:\n"
-            "  pip install markitdown"
-        )
 
     file_path = Path(file_path)
     if not file_path.exists():
@@ -183,17 +175,7 @@ def markdown_to_html(
 
     Returns:
         str: 转换后的HTML文本内容
-
-    Raises:
-        ImportError: 未安装markdown-it-py库时抛出
     """
-    try:
-        from markdown_it import MarkdownIt
-    except ImportError:
-        raise ImportError(
-            "markdown-it-py 未安装，请使用以下命令安装:\n"
-            "  pip install markdown-it-py"
-        )
 
     md = MarkdownIt("commonmark")
 
