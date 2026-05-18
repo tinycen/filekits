@@ -43,6 +43,9 @@ from .markdown_convert import (
     batch_markdown_to_html,
 )
 
+# HTML清理相关
+from .html_clean import clean_html, clean_html_file
+
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
     # 类型定义
@@ -81,4 +84,8 @@ __all__ = [
     'markdown_to_html',
     'markdown_file_to_html',
     'batch_markdown_to_html',
+
+    # HTML清理
+    'clean_html',
+    'clean_html_file',
 ]
