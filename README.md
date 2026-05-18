@@ -9,6 +9,7 @@
 - **文件夹操作**：文件查找、文件夹清理等实用功能
 - **数据处理**：字典工具、pandas数据处理辅助功能
 - **图像处理**：支持图像格式转换、裁剪、缩放、绘制、合成等图像处理功能
+- **Markdown转换**：支持多种文件格式转换为Markdown，以及Markdown转HTML
 
 ## 📁 项目结构
 
@@ -20,7 +21,8 @@ filekits/
 │   ├── load.py             # 文件读取功能
 │   ├── save.py             # 文件保存功能
 │   ├── folder.py           # 文件夹操作
-│   └── down_load.py        # 网络文件下载
+│   ├── down_load.py        # 网络文件下载
+│   └── markdown_convert.py # Markdown转换功能
 ├── image/                 
 │   ├── __init__.py         # 图像处理模块
 │   ├── convert.py          # 图像格式转换
@@ -328,6 +330,111 @@ from filekits.image import is_dark_color
 
 # 判断颜色是否为深色（用于文字颜色选择）
 is_dark = is_dark_color([100, 100, 100])  # RGB值
+```
+
+### 7. Markdown转换
+
+将各种文件格式转换为Markdown，适用于文本分析、LLM处理等场景。
+
+**基础版本支持的输入格式：**
+- PDF
+- PowerPoint (PPTX)
+- Word (DOCX)
+- Excel (XLSX)
+- HTML
+- CSV、JSON、XML
+- ZIP文件（遍历内容）
+- YouTube URLs
+- EPubs
+- 图片（EXIF元数据）
+- 音频（EXIF元数据和语音转录）
+
+> **注意**：如需启用OCR功能（从PDF/DOCX/PPTX/XLSX中的嵌入图片提取文字），需要额外安装`markitdown-ocr`插件并配置LLM客户端。
+
+#### 文件转Markdown
+```python
+from filekits.base_io import file_to_markdown
+
+# 单个文件转换（基础版本）
+content = file_to_markdown('document.pdf')
+
+# 转换并保存到文件
+content = file_to_markdown('document.pdf', output_path='output.md')
+
+# 启用OCR插件（需要先安装markitdown-ocr）
+from openai import OpenAI
+content = file_to_markdown(
+    'document.pdf',
+    enable_plugins=True,
+    llm_client=OpenAI(),
+    llm_model="gpt-4o"
+)
+```
+
+#### 批量文件转Markdown
+```python
+from filekits.base_io import files_to_markdown
+
+file_paths = ['file1.pdf', 'file2.docx', 'file3.xlsx']
+
+# 批量转换（返回字典：文件路径 -> Markdown内容）
+results = files_to_markdown(file_paths)
+
+# 批量转换并保存到目录
+results = files_to_markdown(file_paths, output_dir='./output')
+```
+
+#### 目录批量转Markdown
+```python
+from filekits.base_io import dir_to_markdown
+
+# 转换目录中所有支持的文件
+results = dir_to_markdown('/path/to/docs')
+
+# 只处理特定类型文件
+results = dir_to_markdown('/path/to/docs', file_extensions=['.pdf', '.docx'])
+
+# 递归处理子目录
+results = dir_to_markdown('/path/to/docs', recursive=True)
+
+# 递归处理并保存到输出目录
+results = dir_to_markdown('/path/to/docs', output_dir='./output', recursive=True)
+```
+
+#### Markdown转HTML
+```python
+from filekits.base_io import markdown_to_html
+
+# 将Markdown文本转为HTML
+html_content = markdown_to_html('# Hello\nWorld')
+
+# 转换并保存到文件
+html_content = markdown_to_html('# Hello\nWorld', output_path='output.html')
+```
+
+#### Markdown文件转HTML
+```python
+from filekits.base_io import markdown_file_to_html
+
+# 读取Markdown文件并转为HTML（默认保存为同名.html文件）
+html_content = markdown_file_to_html('document.md')
+
+# 指定输出路径
+html_content = markdown_file_to_html('document.md', output_path='output.html')
+```
+
+#### 批量Markdown转HTML
+```python
+from filekits.base_io import batch_markdown_to_html
+
+# 批量转换目录中的Markdown文件
+results = batch_markdown_to_html('/path/to/markdown_files')
+
+# 递归处理子目录
+results = batch_markdown_to_html('/path/to/markdown_files', recursive=True)
+
+# 指定输出目录
+results = batch_markdown_to_html('/path/to/markdown_files', output_dir='./html_output')
 ```
 
 ## 📄 许可证
