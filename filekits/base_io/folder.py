@@ -76,11 +76,16 @@ def print_folder_tree(folder_path: StrPath, indent='', output_file: StrPath | No
     # 判断是否为Markdown格式（通过文件扩展名）
     is_markdown = output_file is not None and output_file.lower().endswith('.md')
     
-    # 如果是Markdown格式且是第一次调用，写入标题和代码块开始标记
-    if is_markdown and indent == '':
-        with open(output_file, 'w', encoding='utf-8') as f:  # type: ignore
-            f.write(f"# 目录树结构: {os.path.basename(folder_path)}\n\n")
-            f.write("```\n")
+    # 如果是第一次调用，打印顶层目录名称
+    if indent == '':
+        root_name = os.path.basename(folder_path) + '/'
+        if is_markdown:
+            with open(output_file, 'w', encoding='utf-8') as f:  # type: ignore
+                f.write(f"# 目录树结构: {os.path.basename(folder_path)}\n\n")
+                f.write("```\n")
+                f.write(root_name + '\n')
+        else:
+            print(root_name)
     
     # 获取目录中的所有项目，并排序
     items = sorted(os.listdir(folder_path))
