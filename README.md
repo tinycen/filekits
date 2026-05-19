@@ -22,7 +22,8 @@ filekits/
 │   ├── save.py             # 文件保存功能
 │   ├── folder.py           # 文件夹操作
 │   ├── down_load.py        # 网络文件下载
-│   └── markdown_convert.py # Markdown转换功能
+│   ├── markdown_convert.py # Markdown转换功能
+│   └── html_clean.py       # HTML清理功能
 ├── image/                 
 │   ├── __init__.py         # 图像处理模块
 │   ├── convert.py          # 图像格式转换
@@ -435,6 +436,47 @@ results = batch_markdown_to_html('/path/to/markdown_files', recursive=True)
 
 # 指定输出目录
 results = batch_markdown_to_html('/path/to/markdown_files', output_dir='./html_output')
+```
+
+### 8. HTML清理
+
+精简HTML内容，删除meta、style、script标签及其内容，适用于清理爬取的网页数据。
+
+#### 清理HTML字符串
+```python
+from filekits.base_io import clean_html
+
+html = '<html><head><style>body{color:red}</style></head><body>Hello</body></html>'
+cleaned = clean_html(html)
+# 结果: <html><head></head><body>Hello</body></html>
+
+# 保留样式属性
+cleaned = clean_html(html, remove_styles=False)
+```
+
+#### 清理HTML文件
+```python
+from filekits.base_io import clean_html_file
+
+# 清理并覆盖原文件
+cleaned_content = clean_html_file('page.html')
+
+# 清理并保存到新文件
+cleaned_content = clean_html_file('page.html', output_path='cleaned.html')
+```
+
+#### 批量清理文件夹中的HTML文件
+```python
+from filekits.base_io import clean_html_dir
+
+# 递归清理文件夹中所有HTML文件（直接覆盖原文件）
+cleaned_files = clean_html_dir('/path/to/html_folder')
+
+# 自定义编码
+cleaned_files = clean_html_dir('/path/to/html_folder', encoding='gbk')
+
+# 保留样式属性
+cleaned_files = clean_html_dir('/path/to/html_folder', remove_styles=False)
 ```
 
 ## 📄 许可证
