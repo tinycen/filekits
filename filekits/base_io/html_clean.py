@@ -119,3 +119,36 @@ def clean_html_file(
         file_path.write_text(cleaned_content, encoding=encoding)
 
     return cleaned_content
+
+
+def clean_html_dir(
+    dir_path: StrPath,
+    encoding: str = 'utf-8',
+    remove_styles: bool = True,
+) -> List[Path]:
+    """遍历文件夹，清理其中所有的HTML文件
+
+    Args:
+        dir_path: 文件夹路径
+        encoding: 文件编码，默认utf-8
+        remove_styles: 是否移除样式相关属性（class, style, cellspacing, cellpadding, border），默认True
+
+    Returns:
+        List[Path]: 已清理的HTML文件路径列表
+
+    Raises:
+        FileNotFoundError: 文件夹不存在时抛出
+        NotADirectoryError: 路径不是文件夹时抛出
+    """
+    dir_path = Path(dir_path)
+    if not dir_path.exists():
+        raise FileNotFoundError(f"文件夹不存在: {dir_path}")
+    if not dir_path.is_dir():
+        raise NotADirectoryError(f"路径不是文件夹: {dir_path}")
+
+    cleaned_files = []
+    for html_file in dir_path.rglob('*.html'):
+        clean_html_file(html_file, encoding=encoding, remove_styles=remove_styles)
+        cleaned_files.append(html_file)
+
+    return cleaned_files

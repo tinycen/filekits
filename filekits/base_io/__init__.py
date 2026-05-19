@@ -44,7 +44,7 @@ from .markdown_convert import (
 )
 
 # HTML清理相关
-from .html_clean import clean_html, clean_html_file
+from .html_clean import clean_html, clean_html_file, clean_html_dir
 
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
@@ -88,4 +88,5 @@ __all__ = [
     # HTML清理
     'clean_html',
     'clean_html_file',
+    'clean_html_dir',
 ]
