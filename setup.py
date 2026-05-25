@@ -18,7 +18,7 @@ except FileNotFoundError:
 
 setup(
     name='filekits',
-    version='0.2.22',
+    version='0.2.23',
     packages=find_packages(),
     install_requires=install_requires,
     extras_require={
