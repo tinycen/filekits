@@ -33,15 +33,19 @@ from .folder import (
     print_folder_tree
 )
 
-# Markdown转换相关
-from .markdown_convert import (
-    file_to_markdown,
-    files_to_markdown,
-    dir_to_markdown,
-    markdown_to_html,
-    markdown_file_to_html,
-    batch_markdown_to_html,
-)
+# Markdown转换相关 - 延迟导入，需要安装可选依赖
+try:
+    from .markdown_convert import (
+        file_to_markdown,
+        files_to_markdown,
+        dir_to_markdown,
+        markdown_to_html,
+        markdown_file_to_html,
+        batch_markdown_to_html,
+    )
+    _MARKDOWN_AVAILABLE = True
+except ImportError:
+    _MARKDOWN_AVAILABLE = False
 
 # HTML清理相关
 from .html_clean import clean_html, clean_html_file, clean_html_dir
@@ -77,16 +81,19 @@ __all__ = [
     'find_parent_folder',
     'print_folder_tree',
 
-    # Markdown转换
-    'file_to_markdown',
-    'files_to_markdown',
-    'dir_to_markdown',
-    'markdown_to_html',
-    'markdown_file_to_html',
-    'batch_markdown_to_html',
-
     # HTML清理
     'clean_html',
     'clean_html_file',
     'clean_html_dir',
 ]
+
+# 如果markdown依赖可用，添加到__all__
+if _MARKDOWN_AVAILABLE:
+    __all__.extend([
+        'file_to_markdown',
+        'files_to_markdown',
+        'dir_to_markdown',
+        'markdown_to_html',
+        'markdown_file_to_html',
+        'batch_markdown_to_html',
+    ])

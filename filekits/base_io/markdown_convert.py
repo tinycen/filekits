@@ -1,9 +1,33 @@
 from pathlib import Path
-from markitdown import MarkItDown
-from markdown_it import MarkdownIt
 from typing import Any, Optional
 
 from . import StrPath
+
+
+def _check_markitdown():
+    try:
+        from markitdown import MarkItDown
+        return MarkItDown
+    except ImportError:
+        raise ImportError(
+            "markitdown 未安装，请使用以下命令安装:\n"
+            "  pip install filekits[markdown]\n"
+            "或仅安装基础版本:\n"
+            "  pip install markitdown"
+        )
+
+
+def _check_markdown_it():
+    try:
+        from markdown_it import MarkdownIt
+        return MarkdownIt
+    except ImportError:
+        raise ImportError(
+            "markdown-it-py 未安装，请使用以下命令安装:\n"
+            "  pip install filekits[markdown]\n"
+            "或仅安装基础版本:\n"
+            "  pip install markdown-it-py"
+        )
 
 
 def file_to_markdown(
@@ -42,6 +66,7 @@ def file_to_markdown(
     if llm_model is not None:
         kwargs["llm_model"] = llm_model
 
+    MarkItDown = _check_markitdown()
     md = MarkItDown(**kwargs)
     result = md.convert(str(file_path))
     content = result.text_content
@@ -118,19 +143,8 @@ def dir_to_markdown(
         dict: 文件路径到Markdown内容的映射字典
 
     Raises:
-        ImportError: 未安装markitdown库时抛出
         NotADirectoryError: 目录不存在时抛出
     """
-    try:
-        from markitdown import MarkItDown
-    except ImportError:
-        raise ImportError(
-            "markitdown 未安装，请使用以下命令安装:\n"
-            "  pip install markitdown[all]\n"
-            "或仅安装基础版本:\n"
-            "  pip install markitdown"
-        )
-
     dir_path = Path(dir_path)
     if not dir_path.is_dir():
         raise NotADirectoryError(f"目录不存在: {dir_path}")
@@ -177,6 +191,7 @@ def markdown_to_html(
         str: 转换后的HTML文本内容
     """
 
+    MarkdownIt = _check_markdown_it()
     md = MarkdownIt("commonmark")
 
     if plugins:

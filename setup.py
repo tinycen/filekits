@@ -21,6 +21,12 @@ setup(
     version='0.2.22',
     packages=find_packages(),
     install_requires=install_requires,
+    extras_require={
+        'markdown': [
+            'markdown-it-py',
+            'markitdown',
+        ],
+    },
     author='tinycen',
     author_email='sky_ruocen@qq.com',
     description=short_description,
