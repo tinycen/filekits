@@ -311,7 +311,7 @@ output_path = add_text('image.jpg', box_infos, font_path, 'output.jpg')
 
 #### 图像合成
 ```python
-from filekits.image import paste_image, paste_logo
+from filekits.image import paste_image, paste_logo, paste_logo_random
 
 # 在指定位置粘贴图像
 from PIL import Image
@@ -323,6 +323,15 @@ result.save('result.jpg')
 # 在图像四角随机添加水印
 paste_logo('image.jpg', 'logo.png', 'output.jpg', 
            choice=['top_left', 'top_right', 'bottom_left', 'bottom_right'])
+
+# 在图像上随机位置、随机角度、随机透明度粘贴水印
+paste_logo_random('image.jpg', 'logo.png', 'output.jpg')
+
+# 自定义 alpha 缩放范围和角度范围
+# alpha_scale_range: 原图 alpha 值的缩放系数，0.2 表示原透明度的 20%
+paste_logo_random('image.jpg', 'logo.png', 'output.jpg',
+                  alpha_scale_range=(0.1, 0.5),
+                  angle_range=(-30.0, 30.0))
 ```
 
 #### 图像信息
