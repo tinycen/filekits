@@ -11,7 +11,7 @@ from .draw import create_rect_mask, create_polygon_mask, add_text
 from .img_crop import crop_transparent, crop_image, multi_crop_image
 
 # 图片填充/合成相关
-from .img_fill import paste_image, paste_logo, color_fill
+from .img_fill import paste_image, paste_logo, paste_logo_random, color_fill
 
 # 图片信息获取
 from .img_info import is_dark_color, correct_position
@@ -37,6 +37,7 @@ __all__ = [
     # 图片填充/合成相关
     'paste_image',
     'paste_logo',
+    'paste_logo_random',
     'color_fill',
 
     # 图片信息获取
