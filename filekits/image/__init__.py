@@ -19,16 +19,19 @@ from .img_info import is_dark_color, correct_position
 # 图片缩放相关
 from .img_scale import scale_image
 
+# 图片去重相关
+from .img_dedup import dedup_images
+
 # 定义 __all__ 列表，明确指定哪些符号会被导出
 __all__ = [
     # 图片格式转换
     'to_jpg',
-    
+
     # 图片绘制相关
     'create_rect_mask',
     'create_polygon_mask',
     'add_text',
-    
+
     # 图片裁剪相关
     'crop_transparent',
     'crop_image',
@@ -43,7 +46,10 @@ __all__ = [
     # 图片信息获取
     'is_dark_color',
     'correct_position',
-    
+
     # 图片缩放相关
-    'scale_image'
+    'scale_image',
+
+    # 图片去重相关
+    'dedup_images'
 ]

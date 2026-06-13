@@ -1,7 +1,8 @@
 numpy
+pyyaml
 pandas
 openpyxl
-pyyaml
 funcguard
-opencv-python
 Pillow
+imagehash
+opencv-python

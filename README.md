@@ -8,7 +8,7 @@
 - **网络下载**：支持单文件和多文件下载，自动重试机制
 - **文件夹操作**：文件查找、文件夹清理等实用功能
 - **数据处理**：字典工具、pandas数据处理辅助功能
-- **图像处理**：支持图像格式转换、裁剪、缩放、绘制、合成等图像处理功能
+- **图像处理**：支持图像格式转换、裁剪、缩放、绘制、合成、去重等图像处理功能
 - **Markdown转换**：支持多种文件格式转换为Markdown，以及Markdown转HTML
 
 ## 📁 项目结构
@@ -31,7 +31,8 @@ filekits/
 │   ├── img_crop.py         # 图像裁剪
 │   ├── img_fill.py         # 图像填充/合成
 │   ├── img_info.py         # 图像信息获取
-│   └── img_scale.py        # 图像缩放
+│   ├── img_scale.py        # 图像缩放
+│   └── img_dedup.py        # 图像去重
 └── utils/                 
     ├── __init__.py         # 工具模块
     └── dict_util.py        # 字典处理工具
@@ -340,6 +341,20 @@ from filekits.image import is_dark_color
 
 # 判断颜色是否为深色（用于文字颜色选择）
 is_dark = is_dark_color([100, 100, 100])  # RGB值
+```
+
+#### 图像去重
+```python
+from filekits.image import dedup_images
+
+image_urls = [
+    'https://example.com/image1.jpg',
+    'https://example.com/image2.jpg',
+    'https://example.com/image3.jpg'
+]
+
+# 对图片URL列表进行去重，返回不重复的URL列表
+unique_urls = dedup_images(image_urls, './download_temp')
 ```
 
 ### 7. Markdown转换
