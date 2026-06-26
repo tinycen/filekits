@@ -156,11 +156,10 @@ def download_files(
         extensions = []
 
     files_path = []
-    i = 0  # 将i移到循环外部
-    download_fail_count = 0  # 将失败计数器也移到外部，按整个批次计算
+    download_fail_count = 0  # 将失败计数器移到外部，按整个批次计算
     # failed_urls = []  # 记录失败的URL
-
-    for url in files:
+    # 使用 enumerate 可以解决 多线程下的 i 计数问题
+    for idx, url in enumerate(files):
         # 提取文件扩展名（使用urlparse去除查询参数）
         parsed = urlparse(url)
         path = parsed.path
@@ -176,8 +175,7 @@ def download_files(
 
         # 如果文件名太短，加前缀防止重命名冲突
         if len(file_name) < 7:
-            file_name = f"{i}_{file_name}"
-            i += 1
+            file_name = f"{idx}_{file_name}"
 
         try:
             file_path = download_file(url, output_folder, file_name, return_type="path", headers=headers)
