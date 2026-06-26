@@ -27,9 +27,8 @@ from . import StrPath
 
 # 读取txt文档，返回列表
 def load_txt(file_path: StrPath, lower_list=0, return_type="list"):
-    f = open(file_path, "r", encoding='utf-8')
-    text = f.read().strip()
-    f.close()
+    with open(file_path, "r", encoding='utf-8') as f:
+        text = f.read().strip()
     if return_type == "str":
         return text
     else:
