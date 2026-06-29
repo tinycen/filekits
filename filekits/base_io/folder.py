@@ -27,13 +27,16 @@ def clear_folder( folder_path: StrPath ) :
     os.mkdir( folder_path )
 
 
-# 从当前文件路径开始，往上层遍历，遇到指定名称的文件夹后停止，返回对应的绝对路径
-def find_parent_folder( target_folder_name ) :
-    # 获取当前文件路径
-    current_file_path = os.path.dirname( __file__ )
+# 从调用者文件路径开始，往上层遍历，遇到指定名称的文件夹后停止，返回对应的绝对路径
+def find_parent_folder( target_folder_name, start_path: StrPath = None ) :
+    # 获取调用者文件路径作为起点，而非包自身的 __file__
+    if start_path is None :
+        import inspect
+        caller_frame = inspect.currentframe().f_back
+        start_path = inspect.getfile( caller_frame )
     
-    # 从当前路径开始往上遍历
-    current_path = current_file_path
+    # 从调用者路径开始往上遍历
+    current_path = os.path.dirname( os.path.abspath( start_path ) )
     
     while current_path and current_path != os.path.dirname( current_path ) :
         # 检查当前目录名是否为目标文件夹名

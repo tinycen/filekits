@@ -46,14 +46,14 @@ def _send_request_with_retry(url, headers=None, stream=False):
     return response
 
 
-def _write_response_to_file(response, file_path: StrPath, chunk_size: int = 1024):
+def _write_response_to_file(response, file_path: StrPath, chunk_size: int = 524288):
     """
     将响应内容写入文件，支持流式分块写入
 
     Args:
         response: 请求响应对象（requests.Response 或 curl_cffi 响应）
         file_path: 目标文件路径
-        chunk_size: 分块大小（字节），默认 1024
+        chunk_size: 分块大小（字节），默认 512KB (524288)
     """
     with open(file_path, "wb") as f:
         if hasattr(response, "iter_content"):
