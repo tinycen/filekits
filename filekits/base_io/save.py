@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 from . import StrPath
+from ..utils.dict_util import dict_dumps
 
 
 # 检查即将保存的数据
@@ -98,9 +99,11 @@ def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', 
 
 
 # 字典保存为json文件
-def save_json( data_dict, output_file: StrPath = 'output.json', indent = 4 ) :
-    # 将字典转换为JSON格式字符串
-    json_str = json.dumps( data_dict, ensure_ascii = False, indent = indent )
+def save_json( data_dict, output_file: StrPath = 'output.json', indent = 4, 
+               simplify = False, max_length = 15, max_list = 3 ) :
+    # 将字典转换为JSON格式字符串，可选先简化处理
+    json_str = dict_dumps( data_dict, indent = indent, 
+                           simplify = simplify, max_length = max_length, max_list = max_list )
     # 打开文件，以写入模式打开
     with open( output_file, 'w', encoding = 'utf-8' ) as f :
         # 将JSON字符串写入文件
