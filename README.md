@@ -119,6 +119,13 @@ from filekits.base_io import save_json
 
 data = {"name": "Alice", "age": 25}
 save_json(data, 'data.json')
+
+# 启用简化模式：自动截断长字符串、缩减长列表
+large_data = {"content": "这是一段很长的文本内容...", "items": [1, 2, 3, 4, 5]}
+save_json(large_data, 'data.json', simplify=True)
+
+# 自定义简化参数：字符串截断30字符，列表保留5个元素
+save_json(large_data, 'data.json', simplify=True, max_length=30, max_list=5)
 ```
 
 #### 保存文本文件
@@ -245,11 +252,24 @@ base64_list = batch_download_encode_base64(urls)
 
 #### 字典操作
 ```python
-from filekits.utils.dict_util import remove_keys
+from filekits.utils.dict_util import remove_keys, simplify_dict, dict_dumps
 
+# 从字典中移除指定的键
 data = {"name": "Alice", "age": 25, "password": "secret"}
 clean_data = remove_keys(data, ["password"])
 # 结果: {"name": "Alice", "age": 25}
+
+# 递归简化字典：截断过长字符串、缩减过长列表
+complex_data = {
+    "content": "这是一段非常长的文本内容，需要被截断处理",
+    "items": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+simplified = simplify_dict(complex_data, max_length=15, max_list=3)
+# 结果: {"content": "这是一段非常长的文...", "items": [1, 2, 3, "...(+7 more)"]}
+
+# 将字典转换为JSON字符串，可选先简化处理
+json_str = dict_dumps(complex_data, simplify=True, max_length=20, max_list=5)
+print(json_str)
 ```
 
 ### 6. 图像处理
