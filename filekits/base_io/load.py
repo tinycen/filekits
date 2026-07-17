@@ -21,12 +21,12 @@ except ImportError as e:
         ) from e
     raise
 from PIL import Image
-from typing import Union, overload, Literal
+from typing import Union, overload, Literal, cast
 from . import StrPath
 
 
 # 读取txt文档，返回列表
-def load_txt(file_path: StrPath, lower_list=0, return_type="list"):
+def load_txt(file_path: StrPath, lower_list=0, return_type: Literal["str", "list"] = "list"):
     with open(file_path, "r", encoding='utf-8') as f:
         text = f.read().strip()
     if return_type == "str":
@@ -48,7 +48,7 @@ def load_yaml(file_path: StrPath):
 
 
 # 读取Excel文件，返回pandas.DataFrame 或者 sheet
-def load_excel(file_path: StrPath, return_type, sheet_name=None, skiprows=0, header=0):
+def load_excel(file_path: StrPath, return_type: Literal["sheet", "df"], sheet_name=None, skiprows=0, header=0):
     '''
     for i in range (2 , num+1) :  # 第1行是 标题，所以从第2行开始
         sku = sheet.cell (i , 2).value
@@ -96,14 +96,14 @@ def load_image( image_path: StrPath , backend: Literal["PIL"] = "PIL" ) -> Image
 @overload
 def load_image( image_path: StrPath , backend: Literal["cv2"] ) -> np.ndarray : ...
 
-def load_image( image_path: StrPath , backend="PIL" ) -> Union[Image.Image, np.ndarray] :
+def load_image( image_path: Union[StrPath, Image.Image, np.ndarray] , backend="PIL" ) -> Union[Image.Image, np.ndarray] :
     """
     读取图像文件或处理图像对象
-    
+
     Args:
         image_path: 图像文件路径(str)或图像对象(PIL.Image/np.ndarray)
         backend: 读取后端，可选 "PIL" 或 "cv2"，默认 "PIL"
-    
+
     Returns:
         图像对象
         - PIL图像对象有 mode 属性
@@ -111,12 +111,12 @@ def load_image( image_path: StrPath , backend="PIL" ) -> Union[Image.Image, np.n
     """
     if isinstance( image_path , str ) :
         if backend == "PIL" :
-            image = Image.open( image_path )
+            image = cast(Image.Image, Image.open( image_path ))
         elif backend == "cv2" :
-            image = cv2.imread( image_path )
+            image = cast(np.ndarray, cv2.imread( image_path ))
         else:
             raise ValueError(f"不支持的读取方法: {backend}. 请使用 'PIL' 或 'cv2'")
-    elif hasattr(image_path, 'mode') or hasattr(image_path, 'shape') :
+    elif isinstance(image_path, (Image.Image, np.ndarray)) :
         # 如果 image_path 是图像对象(PIL.Image或np.ndarray)，直接使用
         image = image_path
     else:
