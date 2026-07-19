@@ -25,19 +25,41 @@ from typing import Union, overload, Literal, cast
 from . import StrPath
 
 
-# 读取txt文档，返回列表
-def load_txt(file_path: StrPath, lower_list=0, return_type: Literal["str", "list"] = "list"):
+# 读取txt文档，返回字符串或按行切分的列表
+# 使用 @overload 装饰器进行类型重载，以便静态类型检查器（如 Pyright）
+# 能够根据 return_type 参数的值精确推断返回类型，避免类型检查错误
+@overload
+def load_txt(file_path: StrPath, return_type: Literal["list"] = "list", to_lowercase: bool = False) -> list[str]: ...
+
+@overload
+def load_txt(file_path: StrPath, return_type: Literal["str"], to_lowercase: bool = False) -> str: ...
+
+def load_txt(
+    file_path: StrPath,
+    return_type: Literal["str", "list"] = "list",
+    to_lowercase: bool = False,
+) -> Union[str, list[str]]:
+    """
+    读取文本文件，返回字符串或按行切分的列表
+
+    Args:
+        file_path: 文本文件路径
+        return_type: 返回类型，"str" 返回整段文本，"list" 按行切分返回列表，默认 "list"
+        to_lowercase: 是否将文本转为小写，默认 False
+
+    Returns:
+        根据 return_type 返回 str 或 list[str]
+    """
     with open(file_path, "r", encoding='utf-8') as f:
         text = f.read().strip()
+
     if return_type == "str":
-        return text
-    else:
+        return text.lower() if to_lowercase else text
+    elif return_type == "list":
         my_list = text.split("\n")
-        if lower_list == 1:  # 转换为小写
-            new_list = [word.lower() for word in my_list]
-            return new_list
-        else:
-            return my_list
+        return [word.lower() for word in my_list] if to_lowercase else my_list
+    else:
+        raise ValueError(f"return_type 参数错误：{return_type}，应为 'str' 或 'list'")
 
 
 # 读取yaml文件

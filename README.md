@@ -59,7 +59,7 @@ text_list = load_txt('example.txt')
 text_str = load_txt('example.txt', return_type="str")
 
 # 转换为小写列表
-lower_list = load_txt('example.txt', lower_list=1)
+lower_list = load_txt('example.txt', to_lowercase=True)
 ```
 
 #### 读取 JSON/YAML 文件

@@ -33,7 +33,7 @@ title: 2026-07-02-yuanbao/openclaw_yuanbao_robot_model-代码审查报告
 
 > 🚨 以下问题必须立即修复，可能导致程序崩溃、数据丢失或安全漏洞。
 
-### 问题 1：download_files 中异常后打印无意义的"已跳过"
+### 问题 1：download_files 中异常后打印无意义的"已跳过"（忽略）
 
 **文件**：`filekits/base_io/down_load.py`
 **行号**：183
@@ -130,7 +130,7 @@ def save_df(data, output_path: StrPath, charset='utf-8', sepset=None, header=Tru
 
 ---
 
-### 问题 2：img_fill 中存在无法使用的废弃代码块
+### 问题 2：img_fill 中存在无法使用的废弃代码块（忽略）
 
 **文件**：`filekits/image/img_fill.py`
 **行号**：29-41
@@ -184,7 +184,7 @@ def clear_folder(folder_path: StrPath):
 
 > 💡 以下问题建议优化，可提高代码可读性和可维护性。
 
-### 问题 1：is_dark_color 使用简化亮度计算公式
+### 问题 1：is_dark_color 使用简化亮度计算公式（忽略）
 
 **文件**：`filekits/image/img_info.py`
 **行号**：1-3
@@ -210,7 +210,7 @@ def is_dark_color(rgb):
 
 ---
 
-### 问题 2：dedup_images 中 clear_folder 被调用两次
+### 问题 2：dedup_images 中 clear_folder 被调用两次（忽略）
 
 **文件**：`filekits/image/img_dedup.py`
 **行号**：8、26
@@ -278,7 +278,7 @@ for i in range(num_batches):          # i = 0, 1, 2 ...
 
 ---
 
-### 问题 5：img_scale 中图片尺寸相同时的提前返回无文档说明
+### 问题 5：img_scale 中图片尺寸相同时的提前返回无文档说明（忽略）
 
 **文件**：`filekits/image/img_scale.py`
 **行号**：10-11
@@ -315,7 +315,7 @@ def scale_image(path_1, path_2) -> str | None:
 
 > 📝 以下问题建议改进，有助于保持代码风格一致性。
 
-### 问题 1：多模块间方法名命名风格不统一
+### 问题 1：多模块间方法名命名风格不统一（忽略）
 
 **文件**：多个模块
 **级别**：🟢 轻微问题
