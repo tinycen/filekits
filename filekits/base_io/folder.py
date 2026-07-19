@@ -1,5 +1,6 @@
 import os
 import shutil
+import inspect
 from . import StrPath
 
 # 遍历文件夹地址，返回指定类型或包含指定名称的文件列表
@@ -18,21 +19,40 @@ def find_files( folder_path: StrPath , extension: StrPath , filename_match: StrP
     return file_list
 
 
-# 清空指定文件夹
-def clear_folder( folder_path: StrPath ) :
-    # 检测文件夹是否存在，如果不存在就创建
+# 清空指定文件夹：存在则清空内容，不存在则创建
+def clear_folder( folder_path: StrPath ) -> None :
+    # 文件夹不存在时直接创建并返回，避免"先创建再立即删除"的多余操作
     if not os.path.exists( folder_path ) :
         os.makedirs( folder_path )
+        return
+    # 文件夹已存在：删除整个目录树后再重建为空目录
     shutil.rmtree( folder_path )
-    os.mkdir( folder_path )
+    os.makedirs( folder_path )
 
 
 # 从调用者文件路径开始，往上层遍历，遇到指定名称的文件夹后停止，返回对应的绝对路径
-def find_parent_folder( target_folder_name, start_path: StrPath = None ) :
+def find_parent_folder( target_folder_name, start_path: StrPath = "" ) :
+    """
+    从起始路径往上逐层查找名称为 target_folder_name 的目录，找到则返回其绝对路径。
+
+    Args:
+        target_folder_name: 要查找的目录名
+        start_path: 起始路径。为 None 时默认使用 **调用者** 的文件路径
+            （通过 inspect 动态获取），而非包自身的 __file__。
+            该隐式行为方便调用，但会略微增加调试和性能开销；
+            如需更可预测的行为，建议显式传入 start_path。
+
+    Returns:
+        匹配目录的绝对路径，未找到时返回 None。
+    """
     # 获取调用者文件路径作为起点，而非包自身的 __file__
-    if start_path is None :
-        import inspect
-        caller_frame = inspect.currentframe().f_back
+    if not start_path :
+        current_frame = inspect.currentframe()
+        if current_frame is None :
+            return None
+        caller_frame = current_frame.f_back
+        if caller_frame is None :
+            return None
         start_path = inspect.getfile( caller_frame )
     
     # 从调用者路径开始往上遍历

@@ -97,7 +97,8 @@ def download_file(url, download_dir: StrPath, file_name: StrPath = "", return_ty
         file_name = os.path.basename(path)
     else:
         # 如果提供了自定义文件名但没有扩展名，从URL获取扩展名
-        if "." not in file_name:  # pyright: ignore[reportOperatorIssue]
+        # 统一转 str 避免 StrPath(如 pathlib.Path) 使用 in 操作符的语义偏差
+        if "." not in str(file_name):
             file_extension = os.path.splitext(path)[1]
             if file_extension:
                 file_name = f"{file_name}{file_extension}"

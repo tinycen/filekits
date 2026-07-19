@@ -1,4 +1,7 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+
+__version__ = (Path(__file__).parent / "filekits" / ".version").read_text().strip()
 
 short_description = 'Filekits - Python文件处理工具包，提供文件读写、网络下载、文件夹操作、图片处理等常用功能'
 
@@ -18,7 +21,7 @@ except FileNotFoundError:
 
 setup(
     name='filekits',
-    version='0.2.26',
+    version=f'v{__version__}',
     packages=find_packages(),
     install_requires=install_requires,
     extras_require={
@@ -41,4 +44,9 @@ setup(
     python_requires='>=3.10',
     include_package_data=True,
     zip_safe=False,
+    package_data={
+        "filekits": [
+            ".version",
+        ]
+    },
 )

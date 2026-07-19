@@ -18,30 +18,26 @@ def color_fill( image_path, modify_info, output_path ) :
     else :
         color = "white"
 
-    # 加载图片
-    img = Image.open( image_path )
+    # 加载图片（使用 with 确保资源释放，避免循环调用时的文件句柄泄漏）
+    with Image.open( image_path ) as img :
+        # 获取要修改的区域的坐标
+        start_x = modify_info[ 'startX' ]
+        start_y = modify_info[ 'startY' ]
+        end_x = modify_info[ 'endX' ]
+        end_y = modify_info[ 'endY' ]
 
-    # 获取要修改的区域的坐标
-    start_x = modify_info[ 'startX' ]
-    start_y = modify_info[ 'startY' ]
-    end_x = modify_info[ 'endX' ]
-    end_y = modify_info[ 'endY' ]
+        rectangle_width = round( end_x - start_x )
+        rectangle_height = round( end_y - start_y )
 
-    rectangle_width = round( end_x - start_x )
-    rectangle_height = round( end_y - start_y )
+        # 创建遮罩区域
+        white_rectangle = Image.new( 'RGB', (rectangle_width, rectangle_height), color )
+        # 将白色矩形粘贴到原图的指定位置
+        img = paste_image( img, white_rectangle, (start_x, start_y, end_x, end_y), "PIL" )
 
-    # 创建遮罩区域
-    white_rectangle = Image.new( 'RGB', (rectangle_width, rectangle_height), color )
-    # 将白色矩形粘贴到原图的指定位置
-    img = paste_image( img, white_rectangle, (start_x, start_y, end_x, end_y), "PIL" )
-
-    # 检测img是否为RGB格式，确保图像模式为 'RGB'
-    if img.mode != 'RGB' :
-        img = img.convert( 'RGB' )
-    img.save( output_path )
-    img.close()
-
-    return
+        # 检测img是否为RGB格式，确保图像模式为 'RGB'
+        if img.mode != 'RGB' :
+            img = img.convert( 'RGB' )
+        img.save( output_path )
 
 
 def paste_image( original_image , paste_img , box: tuple[int, int] | tuple[int, int, int, int] , backend: Literal["PIL"] = "PIL" ) -> Image.Image:

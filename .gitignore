@@ -3,3 +3,13 @@ __pycache__/
 .vscode/
 download/
 tests/
+
+# Python 构建/打包产物
+*.egg-info/
+dist/
+build/
+
+# 静态检查/测试缓存
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

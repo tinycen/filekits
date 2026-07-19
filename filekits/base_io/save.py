@@ -6,7 +6,7 @@ from ..utils.dict_util import dict_dumps
 
 
 # 检查即将保存的数据
-def pre_check_df( data ) :
+def pre_check_df( data ) -> pd.DataFrame :
     # 如果输入是列表，转换为DataFrame
     if isinstance( data , list ) :
         return pd.DataFrame( data )
@@ -17,33 +17,35 @@ def pre_check_df( data ) :
         raise TypeError( "输入数据必须是列表List或DataFrame类型" )
 
 
-def save_df( data , output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) :
+def save_df( data , output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) -> None :
     """
     将DataFrame或列表保存为指定格式的文件
-    
+
     参数:
         data: 输入数据，可以是DataFrame或列表
         output_path: 输出文件路径，支持.xlsx、.csv、.txt、.json格式
         charset: 文件编码，默认为'utf-8'
         sepset: 分隔符设置，用于csv/txt文件，默认为None（使用pandas默认设置）
         header: 是否保留表头，默认为True（保留表头）
-    
+
     返回:
-        None
+        None：仅保存文件，无返回值。如需获取保存路径请使用传入的 output_path。
     """
     df = pre_check_df( data )
+    # 统一转为字符串再判断后缀，避免 StrPath(如 pathlib.Path) 使用 in 操作符的语义偏差
+    path_str = str( output_path )
 
-    if ".xlsx" in output_path :
+    if path_str.endswith( '.xlsx' ) :
         df.to_excel( output_path , index = False , header = header )
 
-    elif ".csv" in output_path or ".txt" in output_path :
+    elif path_str.endswith( '.csv' ) or path_str.endswith( '.txt' ) :
         # 只有在指定了分隔符的情况下才使用，否则使用pandas默认设置
         if sepset is not None:
             df.to_csv( output_path , index = False , encoding = charset , sep = sepset , header = header )
         else:
             df.to_csv( output_path , index = False , encoding = charset , header = header )
 
-    elif ".json" in output_path :
+    elif path_str.endswith( '.json' ) :
         df.to_json( output_path , orient = 'records' , force_ascii = False , indent = 4 )
 
     else :
@@ -53,7 +55,7 @@ def save_df( data , output_path: StrPath , charset = 'utf-8', sepset = None, hea
     return
 
 
-def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) :
+def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', sepset = None, header = True ) -> None :
     """
     将DataFrame或列表，按照批次大小，保存为指定格式的文件
     
@@ -75,8 +77,8 @@ def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', 
         raise ValueError( "批次大小必须大于0" )
     
     # 使用os.path模块更安全地处理文件路径
-    base_name = os.path.splitext( output_path )[0]
-    extension = os.path.splitext( output_path )[1]
+    base_name = os.path.splitext( str( output_path ) )[0]
+    extension = os.path.splitext( str( output_path ) )[1]
     
     total_rows = len( df )
     # 计算批次数量
@@ -91,8 +93,8 @@ def batch_save_df( data , batch_size, output_path: StrPath , charset = 'utf-8', 
         batch_df = df[ start_idx : end_idx ]
         # 生成批次文件名
         batch_output_path = f"{base_name}_{i+1}{extension}"
-        # 打印即将保存的批次信息
-        print( f"Save batch {i+1} : rows {start_idx} ~ {end_idx-1}" )
+        # 打印即将保存的批次信息：使用半开区间 [start_idx, end_idx)，并标注实际行数
+        print( f"Save batch {i+1} : rows [{start_idx}, {end_idx}) ({end_idx - start_idx} rows)" )
         # 保存批次数据
         save_df( batch_df , batch_output_path , charset = charset , sepset = sepset , header = header )
     return

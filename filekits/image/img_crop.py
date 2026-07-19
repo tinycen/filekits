@@ -29,7 +29,7 @@ def crop_transparent( image_path: StrPath , turn_jpg: bool = False ) :
             _ , mask = cv2.threshold( alpha_channel , 0 , 255 , cv2.THRESH_BINARY )  # binarize mask
             color = cropped_img[ : , : , :3 ]
             new_img = cv2.bitwise_not( cv2.bitwise_not( color , mask = mask ) )
-            image_path = image_path.rsplit( '.' , 1 )[ 0 ] + '.jpg'
+            image_path = str( image_path ).rsplit( '.' , 1 )[ 0 ] + '.jpg'
             cv2.imwrite( image_path , new_img )
 
     return image_path
@@ -94,6 +94,7 @@ def multi_crop_image( image_path: StrPath, output_path: StrPath, multi_regionCro
     for modify_info in multi_regionCrop :
         crop_area = correct_position( modify_info )
         if crop_area is None :
+            print( f"警告: 区域坐标无效，已跳过: {modify_info}" )
             continue
         start_x = crop_area[ 'startX' ]
         start_y = crop_area[ 'startY' ]
@@ -118,7 +119,7 @@ def multi_crop_image( image_path: StrPath, output_path: StrPath, multi_regionCro
 
     # 将遮罩与原始图像进行"乘法"操作，从而达到裁剪的效果
     remaining_image = Image.composite( original_image, Image.new( 'RGBA', original_image.size ), mask )
-    multi_crop_imagePath = output_path.rsplit( '.', 1 )[ 0 ] + '.png'
+    multi_crop_imagePath = str( output_path ).rsplit( '.', 1 )[ 0 ] + '.png'
     remaining_image.save( multi_crop_imagePath )
     output_path = crop_transparent( multi_crop_imagePath, turn_jpg = True )
     original_image.close()

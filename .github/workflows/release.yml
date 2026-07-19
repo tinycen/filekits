@@ -155,7 +155,7 @@ jobs:
         twine upload dist/*
 
     - name: Create GitHub Release with AI Notes
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         # 使用上一步 AI 生成的内容作为 Release 的 body
         body: ${{ steps.ai_release_notes.outputs.release_body }}
