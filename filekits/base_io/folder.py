@@ -4,7 +4,18 @@ import inspect
 from . import StrPath
 
 # 遍历文件夹地址，返回指定类型或包含指定名称的文件列表
-def find_files( folder_path: StrPath , extension: StrPath , filename_match: StrPath = "" ) :
+def find_files( folder_path: StrPath , extension: StrPath , filename_match: StrPath = "" )  -> list[StrPath] :
+    """
+    遍历指定文件夹下的所有文件，返回所有符合扩展名和文件名匹配条件的文件路径列表。
+
+    Args:
+        folder_path: 要遍历的文件夹路径
+        extension: 要匹配的文件扩展名（如 ".txt"）
+        filename_match: 可选的文件名匹配模式（如 "*.txt"）
+
+    Returns:
+        匦合扩展名和文件名匹配条件的文件路径列表
+    """
     file_list = [ ]
     # 遍历目录
     for root , dirs , files in os.walk( folder_path ) :
